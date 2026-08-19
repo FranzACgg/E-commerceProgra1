@@ -15,11 +15,11 @@ def transicionInicio():
     print("Volviendo al incio...")
     respuesta = input("[presione enter]")
     
-def ingresarUsuario(listadoUsuarios):
+def ingresarUsuario(tipoCuenta,listadoUsuarios):
     """Ingreso para usuarios ya creados, compara el nombre y la contrasenia creados anteriormente con una base
     de datos json, pero por mientras se usara una lista de listas, limitador de intentos (para evitar hackeos) \
     y mensaje para crear una nueva cuenta
-    """
+    """ 
     bandera = True
     intentos = 0
     
@@ -33,12 +33,12 @@ def ingresarUsuario(listadoUsuarios):
     print(respuesta)
     if respuesta.lower() == "y":
 
-        asignarUsuarios(listadoUsuarios)
+        asignarUsuarios(tipoCuenta,listadoUsuarios,[])
         transicionInicio()
         bandera = False
 
     elif respuesta.lower() == "n":
-        print("\nINGRESE SU CUENTA CREADA ANTERIORMENTE")
+        print("\nIngrese su cuenta creada anteriormente")
         
     while bandera:
         nombre,contra = ingresoDatos()
@@ -63,7 +63,7 @@ def ingresarUsuario(listadoUsuarios):
                 print(respuesta)
                 if respuesta.lower() == "y":
 
-                    asignarUsuarios(listadoUsuarios)
+                    asignarUsuarios(tipoCuenta,listadoUsuarios,[])
                     transicionInicio()
                     bandera = False
     
@@ -74,25 +74,44 @@ def ingresarUsuario(listadoUsuarios):
                 print("Error intente denuevo mas tarde")    
                 bandera = False
         
-        
-    
-    
-def nuevoUsuario():
-    """Se creara una contrasenia con caracteristicas definidas que debera validarse con expresiones regulares
-    y para el usuario debera ingresar uno que no sea repetido.
-    """
-    mensajeContrasenia = """##### Ingrese su contrasenia, debe contener ##### 
-                          \n -2 Letras mayusculas 
-                          \n -2 Simbolos 
-                          \n -2 Numeros:\ncontrasenia: """ 
-    nuevoUser = input("Bienvenido nuevo usuario: Escriba su nombre de usuario: ")
-    contraUser = input(mensajeContrasenia)
-    
-    return nuevoUser,contraUser
 
     
-       
-def ingresarAdministrador(listadoAdmins):
+    
+def nuevoUsuario(tipoCuenta,listadoAdmins):
+    """Se creara una contrasenia con caracteristicas definidas que debera validarse con expresiones regulares
+    y para el usuario debera ingresar uno que no sea repetido.
+    0: Usuario 1:Administrador
+    """
+    
+    mensajeContrasenia = """##### Ingrese su contrasenia, debe contener ##### 
+                        \n -2 Letras mayusculas 
+                        \n -2 Simbolos 
+                        \n -2 Numeros:\ncontrasenia: """ 
+    nuevoUser = input("Bienvenido, coloque el nombre de su nueva cuenta: ")
+    contraUser = input(mensajeContrasenia)
+        
+    if tipoCuenta == 0:
+        return nuevoUser,contraUser,False
+    
+    if tipoCuenta == 1:
+        if comprobarEmail(listadoAdmins) == True:
+            return nuevoUser,contraUser,True 
+        if comprobarEmail(listadoAdmins) == False:
+            return None,None,False
+        
+def comprobarEmail(listadoAdmins):
+    verificado = False
+    verificarEmail = input("Ingrese el email de verificacion para ser administrador: ")
+    
+    if verificarEmail != listadoAdmins[0][2]:
+        print("El email es incorrecto, no se ha creado la cuenta correctamente")
+    else:
+        print("Se ha enviado un email al buzon del administrador, confirme para permitir el acceso")    
+        verificado = True
+        
+    return verificado 
+        
+def ingresarAdministrador(tipoCuenta,listadoAdmins):
     """Usuario y contrasenia ya predefinidos, mas adelante se podran agregar nuevos administradores y eliminar
     otros.
     """
@@ -121,14 +140,23 @@ def ingresarAdministrador(listadoAdmins):
             print("Error al ingresar contrasenia o usuario")
             intentos =+ 1
             
+            respuesta = input("Desea crear una nueva cuenta de administrador? Y/N ")
+            
+            if respuesta.lower() == "y":
+                
+                asignarUsuarios(tipoCuenta,[],listadoAdmins)
+                transicionInicio()
+                bandera = False
+        
+            elif respuesta.lower() == "n":
+                print("\nIngrese la cuenta del administrador")
+                
+            
             if intentos == 3:
                 print("Error demasiados intentos, administrador incorrecto")
                 bandera == False  
 
           
-        
-    
-
 def ingresoGeneral(listadoUsuarios,listadoAdmins):
     """
     Antes del ingreso de datos, se debe verificar que tipo entrada quiere, ya que la contrasenia y el nombre
@@ -143,28 +171,30 @@ def ingresoGeneral(listadoUsuarios,listadoAdmins):
     
     
     if respuestaIngreso.lower() == "u":
-        ingresarUsuario(listadoUsuarios)
+        tipoCuenta = 0
+        ingresarUsuario(tipoCuenta,listadoUsuarios)
         return True
            
                     
     if respuestaIngreso.lower() == "a":    
-        ingresarAdministrador(listadoAdmins)
+        tipoCuenta = 1
+        ingresarAdministrador(tipoCuenta,listadoAdmins)
         return True
             
-    if respuestaIngreso.lower() == "s":    
-        return False
-         
-
-         
+    if respuestaIngreso.lower() == "s":   
+        return False 
         
         
 
 def asignarAdmins(listadoAdmins):
-    nombreAdmin = "robertocarlos"
-    contraAdmin = "2219345GGez"
+    nombreAdminPrincipal = "robertocarlos"
+    contraAdminPrincipal = "2219345GGez"
+    emailAdminPrincipal = "rcarlos@gmail.com"
     
-    listadoAdmins[0][0] = nombreAdmin
-    listadoAdmins[0][1] = contraAdmin
+    listadoAdmins[0][0] = nombreAdminPrincipal
+    listadoAdmins[0][1] = contraAdminPrincipal
+    listadoAdmins[0][2] = emailAdminPrincipal
+
 
 def verificarDisponibilidad(lista):
     for usuario in lista:
@@ -172,17 +202,35 @@ def verificarDisponibilidad(lista):
             return usuario
     return ["",""]
 
-def asignarUsuarios(listadoUsuarios):
-    user, contra = nuevoUsuario()
-    usuarioVacio = verificarDisponibilidad(listadoUsuarios)
-    usuarioVacio[0],usuarioVacio[1] = user,contra
+def asignarUsuarios(tipoCuenta,listadoUsuarios,listadoAdmins):
     
-    if usuarioVacio == ["",""]:
-        listadoUsuarios.append([user,contra])
+    
+    if tipoCuenta == 0:
+        user, contra, suspenderInfo = nuevoUsuario(tipoCuenta,listadoUsuarios)
+        usuarioVacio = verificarDisponibilidad(listadoUsuarios)
+                
+        usuarioVacio[0],usuarioVacio[1] = user,contra
         
-    print("Se creo su usuario correctamente")
-    
-    
+        if usuarioVacio == ["",""]:
+            listadoUsuarios.append([user,contra])
+        
+        print("Se creo su usuario correctamente")
+
+    if tipoCuenta == 1:
+        user, contra, suspenderInfo = nuevoUsuario(tipoCuenta,listadoAdmins)
+            
+        if suspenderInfo == False: 
+            print("Error, no se creo la peticion del email")
+
+        elif suspenderInfo == True:
+            cuentaPendienteVerificacion(user,contra)
+        
+        
+        
+def cuentaPendienteVerificacion(user,contra):
+        """Sube la informacion al apartado Email, pendiente a verificar"""
+        print("Verifique en el email, en la pagina principal, ingresando [E]: Nombre: " + user + " Contrasenia: " + contra)
+        
 def mensajeInicio():
     mensajeIncio = """\t\t===============================================
                         Bienveenido al supermercado Online
@@ -199,7 +247,7 @@ def main():
     
     
     
-    listadoAdmins = [[" " for _ in range(2)] for i in range(1)]
+    listadoAdmins = [[" " for _ in range(3)] for i in range(1)]
     
     asignarAdmins(listadoAdmins)
     
