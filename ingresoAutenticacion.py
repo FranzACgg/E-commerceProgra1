@@ -1,3 +1,10 @@
+import re
+import verificacionPorEmail
+
+def validarContrasenia(contra):
+    patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
+    return bool(re.match(patron, contra))
+
 def ingresoDatos():
     nombre = input("Nombre: ")
     contrasenia = input("Contraseña: ")
@@ -13,6 +20,10 @@ def transicionInicio():
     print("Volviendo al inicio...")
     input("[Presione Enter para continuar]")
 
+def usuarioEnLista(nombre, lista):
+    filtrado = list(filter(lambda x: x[0] == nombre, lista)) 
+    return len(filtrado) > 0
+
 def pedirCredencialesNuevas(listadoUsuarios):
     mensajeContrasenia = """##### Ingrese su contraseña, debe contener ##### 
  - 2 Letras mayúsculas 
@@ -21,27 +32,21 @@ def pedirCredencialesNuevas(listadoUsuarios):
 Contraseña: """ 
     nuevoUser = input("Bienvenido, coloque el nombre de su nueva cuenta: ")
     
-    while (usuarioEnLista(nuevoUser,listadoUsuarios)):
-        nuevoUser = input("Ese usuario ya se encuentra, coloque el nombre de su nueva cuenta")
+    while usuarioEnLista(nuevoUser, listadoUsuarios) or nuevoUser.strip() == "":
+        nuevoUser = input("Usuario ingresado inválido o ya existente, coloque otro nombre: ")
         
     contraUser = input(mensajeContrasenia)
+    while not validarContrasenia(contraUser):
+        print("\n[ERROR] La contraseña no cumple con el formato requerido.")
+        contraUser = input(mensajeContrasenia)
     
     return nuevoUser, contraUser
 
 def verificarDisponibilidad(lista):
-    """Verifica si hay espacio en la lista anteriormente creada
-
-    Args:
-        lista (_type_): La lista puede ser de usuarios o administradores
-
-    Returns:
-        _type_: retorna una lista vacia si ya no hay espacio, para poder aniadirlo con un append
-    """
     for usuario in lista:
         if usuario[0] == " ":
             return usuario
     return ["", ""]
-
 
 def registrarCliente(listadoUsuarios):
     user, contra = pedirCredencialesNuevas(listadoUsuarios)
@@ -54,29 +59,15 @@ def registrarCliente(listadoUsuarios):
     
     print("Se creó su usuario correctamente.")
 
-def registrarAdministrador(listadoAdmins):
-    if comprobarEmail(listadoAdmins):
-        user, contra = pedirCredencialesNuevas()
-        cuentaPendienteVerificacion(user, contra)
+def registrarAdministrador(listadoAdmins, buzonEmail):
+    if verificacionPorEmail.comprobarEmail(listadoAdmins):
+        user, contra = pedirCredencialesNuevas(listadoAdmins)
+        mensaje = verificacionPorEmail.cuentaPendienteVerificacion(user, contra)
+        verificacionPorEmail.cargarMensaje(buzonEmail, mensaje)
     else:
         print("Error: No se pudo verificar el email de administrador. No se creó la cuenta.")
 
-def comprobarEmail(listadoAdmins):
-    verificacion = input("Ingrese el email de verificación para ser administrador: ")
-    if verificacion != listadoAdmins[0][2]:
-        print("El email es incorrecto.")
-        return False
-    else:
-        print("Se ha enviado una solicitud al buzón del administrador.")    
-        return True 
-
-def cuentaPendienteVerificacion(user, contra):
-    """Sube la información al apartado Email, pendiente a verificar"""
-    print(f"Verifique en el email (opción [E] en menú principal): Nombre: {user} | Contraseña: {contra}")
-
-
 def ingresarUsuario(listadoUsuarios):
-    """Ingreso para usuarios ya creados.""" 
     bandera = True
     intentos = 0
     
@@ -88,7 +79,6 @@ def ingresarUsuario(listadoUsuarios):
     
     respuesta = input("¿Desea crear un nuevo usuario? Y/N: ")
     if respuesta.lower() == "y":
-        # REFACTOR: Llamada limpia sin tipoCuenta ni listas extra
         registrarCliente(listadoUsuarios)
         transicionInicio()
         bandera = False
@@ -104,31 +94,30 @@ def ingresarUsuario(listadoUsuarios):
                 print("Bienvenido de vuelta usuario")
                 transicionInicio()
                 login_exitoso = True
-                
+                break
         
         if login_exitoso:
             bandera = False
-            
-        usuario = verificarLista(listadoUsuarios, nombre)
-        
-        if usuario[1] != contra:   
-            print("Error al ingresar contraseña o usuario")
-            intentos += 1
-            
-            if intentos == 3:
-                respuesta = input("Demasiados intentos fallidos. ¿Desea crear un nuevo usuario? Y/N: ")
-                if respuesta.lower() == "y":
-                    registrarCliente(listadoUsuarios)
-                    transicionInicio()
+        else:
+            usuario = verificarLista(listadoUsuarios, nombre)
+            if usuario[1] != contra:   
+                print("Error al ingresar contraseña o usuario")
+                intentos += 1
+                
+                if intentos == 3:
+                    respuesta = input("Demasiados intentos fallidos. ¿Desea crear un nuevo usuario? Y/N: ")
+                    if respuesta.lower() == "y":
+                        registrarCliente(listadoUsuarios)
+                        transicionInicio()
+                        bandera = False
+                    elif respuesta.lower() == "n":
+                        print("Le quedan 3 intentos más, sino finalizará su sesión.")
+                
+                if intentos == 6:
+                    print("Error: demasiados intentos fallidos. Intente de nuevo más tarde.")    
                     bandera = False
-                elif respuesta.lower() == "n":
-                    print("Le quedan 3 intentos más, sino finalizará su sesión.")
-            
-            if intentos == 6:
-                print("Error: demasiados intentos fallidos. Intente de nuevo más tarde.")    
-                bandera = False
 
-def ingresarAdministrador(listadoAdmins):
+def ingresarAdministrador(listadoAdmins, buzonEmail):
     mensajeAdministrador = """\n\t\t\t############ Bienvenido Administrador #############
                             
                             [Por favor ingrese su nombre y contraseña]"""
@@ -145,65 +134,55 @@ def ingresarAdministrador(listadoAdmins):
         for usuarios in listadoAdmins:
             if usuarios[0] == nombre and usuarios[1] == contra and nombre.strip() != "":
                 print("Bienvenido de vuelta admin\n")
-                bandera = False
                 login_exitoso = True
                 break
         
         if login_exitoso:
-            break
+            bandera = False
+        else:
+            usuario = verificarLista(listadoAdmins, nombre)
+            if usuario[1] != contra:
+                print("Error al ingresar contraseña o usuario")
+                intentos += 1
                 
-        usuario = verificarLista(listadoAdmins, nombre)
+                respuesta = input("¿Desea crear una nueva cuenta de administrador? Y/N: ")
                 
-        if usuario[1] != contra:
-            print("Error al ingresar contraseña o usuario")
-            intentos += 1
-            
-            respuesta = input("¿Desea crear una nueva cuenta de administrador? Y/N: ")
-            
-            if respuesta.lower() == "y":
-                # REFACTOR: Llamada limpia
-                registrarAdministrador(listadoAdmins)
-                transicionInicio()
-                bandera = False
-            elif respuesta.lower() == "n":
-                print("\nIngrese la cuenta del administrador")
-            
-            if intentos >= 3:
-                print("Error demasiados intentos, administrador incorrecto.")
-                bandera = False
+                if respuesta.lower() == "y":
+                    registrarAdministrador(listadoAdmins, buzonEmail)
+                    transicionInicio()
+                    bandera = False
+                elif respuesta.lower() == "n":
+                    print("\nIngrese la cuenta del administrador")
+                
+                if intentos >= 3:
+                    print("Error demasiados intentos, administrador incorrecto.")
+                    bandera = False
 
 def mensajeInicio():
     mensajeInicioText = """\t\t===============================================
                         Bienvenido al Supermercado Online
                 ==============================================="""
-                
     print(mensajeInicioText)
-    
-def usuarioEnLista(nombre,lista):
-    usuarioEncontrado = False
-    
-    filtrado = list(filter(lambda x: x[0] == nombre,lista)) 
-    
-    if len(filtrado) > 0:
-        usuarioEncontrado = True
-    
-    return usuarioEncontrado
 
-def ingresoGeneral(listadoUsuarios, listadoAdmins):
+def ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin):
     mensajeInicio()
     
     print("""\n\t   ============== [Ingreso como usuario [u]] ================
 \t   ============== [Ingreso como administrador [a]] ============\n""")
-    respuestaIngreso = input("Tipo de ingreso (o 's' para salir): ")
+    respuestaIngreso = input("Tipo de ingreso (Otras opciones: 'b' para buzón o 's' para salir): ")
     
     if respuestaIngreso.lower() == "u":
         ingresarUsuario(listadoUsuarios)
         return True
                     
     if respuestaIngreso.lower() == "a":    
-        ingresarAdministrador(listadoAdmins)
+        ingresarAdministrador(listadoAdmins, buzonEmail)
         return True
             
+    if respuestaIngreso.lower() == "b":
+        verificacionPorEmail.abrirEmail(buzonEmail, emailAdmin, contraAdmin, listadoAdmins)
+        return True
+        
     if respuestaIngreso.lower() == "s":    
         return False 
 
@@ -217,16 +196,19 @@ def asignarAdmins(listadoAdmins):
     listadoAdmins[0][0] = nombreAdminPrincipal
     listadoAdmins[0][1] = contraAdminPrincipal
     listadoAdmins[0][2] = emailAdminPrincipal
+    
+    return emailAdminPrincipal, contraAdminPrincipal
 
 def main():
     bandera = True
     listadoUsuarios = [[" " for _ in range(2)] for _ in range(3)]
     listadoAdmins = [[" " for _ in range(3)] for _ in range(1)]
     
-    asignarAdmins(listadoAdmins)
+    buzonEmail = verificacionPorEmail.crearBuzon()
+    emailAdmin, contraAdmin = asignarAdmins(listadoAdmins)
     
     while bandera:
-        bandera = ingresoGeneral(listadoUsuarios, listadoAdmins)
+        bandera = ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin)
 
 
 main()
