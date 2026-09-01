@@ -1,0 +1,59 @@
+from functools import reduce
+
+def calcularPrecioProducto(producto):
+    """calcula el precio de un producto x=[id_producto,nombre,precio,stock]"""
+    return producto[2]*producto[3]
+
+def calcularTotalCarrito(carrito):
+    """calcula el total a pagar de la lista del carrito"""
+    if not carrito:
+        return 0.0
+    subtotales=list(map(lambda producto:producto[2]*producto[3],carrito))
+    total=reduce(lambda acumulador,subtotal:acumulador + subtotal, subtotales,0.0)
+    return round(total,2)
+
+def registrarVenta(historialVentas,IDventa,mailCliente,fecha,carrito):
+    """Agrega una nueva venta confirmada al historial general de transacciones.
+    Retorna el historial actualizado"""
+    totalVenta=calcularTotalCarrito(carrito)
+    nuevaVenta=[IDventa,mailCliente,fecha,carrito,totalVenta]
+    historialVentas.append(nuevaVenta)
+    return historialVentas
+
+def obtenerHistorialCliente(historialVentas,mailCliente):
+    """muestra el historial de compras de un cliente"""
+    return list(filter(lambda venta:venta[1].lower()==mailCliente.lower(),historialVentas))
+
+def calcularRecaudacionTotal(historialVentas):
+    """
+    Calcula la suma total acumulada de todas las ventas
+    """
+    if not historialVentas:
+        return 0.0
+    
+    montos = list(map(lambda venta: venta[4], historialVentas))
+    total_acumulado = reduce(lambda acumulado, monto: acumulado + monto, montos, 0.0)
+    return round(total_acumulado, 2)
+
+def calcularRecaudacionFecha(historialVentas, fechaBusqueda):
+    """
+    Calcula el total recaudado en una fecha específica
+    """
+    ventasFecha = list(filter(lambda venta: venta[2] == fechaBusqueda, historialVentas))
+    
+    if not ventasFecha:
+        return 0.0
+    
+    montosFecha = list(map(lambda venta: venta[4], ventasFecha))
+    return round(reduce(lambda acum, monto: acum + monto, montosFecha, 0.0), 2)
+
+def obtenerTotalGastadoCliente(historialVentas, mailCliente):
+    """
+    Calcula el total histórico que un cliente específico ha gastado en la tienda.
+    """
+    ventasCliente = obtenerHistorialCliente(historialVentas, mailCliente)
+    if not ventasCliente:
+        return 0.0
+    
+    montosCliente = list(map(lambda venta: venta[4], ventasCliente))
+    return round(reduce(lambda acum, monto: acum + monto, montosCliente, 0.0), 2)
