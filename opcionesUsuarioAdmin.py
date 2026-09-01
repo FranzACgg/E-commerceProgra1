@@ -139,8 +139,7 @@ def menu_administrador():
     productos = catalogo_productos
 
     opcion = ""
-    bandera = ""
-    while bandera:
+    while opcion != "7":
         print("\n=== PANEL DE INVENTARIO ===")
         print("1. Ver catálogo completo")
         print("2. Ver alerta de stock crítico")
@@ -189,11 +188,8 @@ def menu_administrador():
             
         elif opcion == "7":
             print("Saliendo del módulo de inventario...")
-            break
+            
         else:
             print("Opción no válida. Intente nuevamente.")
 
-
-
-menu_administrador()
 
