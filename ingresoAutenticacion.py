@@ -1,6 +1,6 @@
 import re
 import verificacionPorEmail
-
+import busqueda
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
     return bool(re.match(patron, contra))
@@ -98,6 +98,7 @@ def ingresarUsuario(listadoUsuarios):
         
         if login_exitoso:
             bandera = False
+            busqueda.menu_cliente(nombre)
         else:
             usuario = verificarLista(listadoUsuarios, nombre)
             if usuario[1] != contra:   
@@ -206,9 +207,8 @@ def main():
     
     buzonEmail = verificacionPorEmail.crearBuzon()
     emailAdmin, contraAdmin = asignarAdmins(listadoAdmins)
-    
+
     while bandera:
         bandera = ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin)
 
 
-main()

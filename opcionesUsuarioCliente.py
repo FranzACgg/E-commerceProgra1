@@ -151,7 +151,7 @@ def resumen_compra(carrito):
         return False
 
 
-def menu_cliente(nombre_usuario, catalogo):
+def menu_cliente(nombre_usuario, catalogo = catalogo_productos):
     """Menú principal del cliente una vez autenticado."""
     carrito = {}
     while True:
