@@ -1,8 +1,6 @@
 from functools import reduce
+from datetime import date
 
-def calcularPrecioProducto(producto):
-    """calcula el precio de un producto x=[id_producto,nombre,precio,stock]"""
-    return producto[2]*producto[3]
 
 def calcularTotalCarrito(carrito):
     """calcula el total a pagar de la lista del carrito"""
@@ -12,17 +10,18 @@ def calcularTotalCarrito(carrito):
     total=reduce(lambda acumulador,subtotal:acumulador + subtotal, subtotales,0.0)
     return round(total,2)
 
-def registrarVenta(historialVentas,IDventa,mailCliente,fecha,carrito):
+def registrarVenta(historialVentas,nombreCliente,carrito):
     """Agrega una nueva venta confirmada al historial general de transacciones.
     Retorna el historial actualizado"""
     totalVenta=calcularTotalCarrito(carrito)
-    nuevaVenta=[IDventa,mailCliente,fecha,carrito,totalVenta]
+    fecha = date.today()
+    nuevaVenta=[nombreCliente,fecha,carrito,totalVenta]
     historialVentas.append(nuevaVenta)
     return historialVentas
 
-def obtenerHistorialCliente(historialVentas,mailCliente):
+def obtenerHistorialCliente(historialVentas,nombre):
     """muestra el historial de compras de un cliente"""
-    return list(filter(lambda venta:venta[1].lower()==mailCliente.lower(),historialVentas))
+    return list(filter(lambda venta:venta[1].lower()==nombre.lower(),historialVentas))
 
 def calcularRecaudacionTotal(historialVentas):
     """
@@ -47,13 +46,16 @@ def calcularRecaudacionFecha(historialVentas, fechaBusqueda):
     montosFecha = list(map(lambda venta: venta[4], ventasFecha))
     return round(reduce(lambda acum, monto: acum + monto, montosFecha, 0.0), 2)
 
-def obtenerTotalGastadoCliente(historialVentas, mailCliente):
+def obtenerTotalGastadoCliente(historialVentas, nombre):
     """
     Calcula el total histórico que un cliente específico ha gastado en la tienda.
     """
-    ventasCliente = obtenerHistorialCliente(historialVentas, mailCliente)
+    ventasCliente = obtenerHistorialCliente(historialVentas, nombre)
     if not ventasCliente:
         return 0.0
     
     montosCliente = list(map(lambda venta: venta[4], ventasCliente))
     return round(reduce(lambda acum, monto: acum + monto, montosCliente, 0.0), 2)
+
+def main():
+    print

@@ -80,7 +80,6 @@ def leerMensaje(bandeja, listadoAdmins):
                 
                 if confirmar.lower() == "y":
                     print("Solicitud aprobada.")
-                    # Extraer credenciales del mensaje ("Pedido de  para el usuario:USER:CONTRA")
                     partes = contenido_mensaje.split(":")
                     if len(partes) >= 3:
                         nuevo_u = partes[1]
