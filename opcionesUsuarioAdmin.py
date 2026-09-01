@@ -183,6 +183,3 @@ def menu_administrador():
             print("Opción no válida. Intente nuevamente.")
 
 
-if __name__ == "__main__":
-    menu_administrador()
-

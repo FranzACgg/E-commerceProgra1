@@ -1,4 +1,5 @@
 import re
+import opcionesFinanzasAdmin
 
 catalogo_productos = [
     [1, "Leche Entera 1L", "Lácteos", 1200.0, 15, "Leche fluida pasteurizada"],
@@ -131,8 +132,7 @@ def modificar_o_eliminar_carrito(carrito):
         print("Opción no válida.")
 
 
-def resumen_compra(carrito):
-    """ Muestra un resumen de la compra y solicita confirmación para simular el pago. """
+def resumen_compra(carrito,historial,nombreCliente):
     if len(carrito) == 0:
         print("\nNo puede finalizar compra con el carrito vacío.")
         return False
@@ -147,6 +147,7 @@ def resumen_compra(carrito):
     confirmar = input("¿Desea confirmar y simular el pago? (S/N): ")
     if confirmar.lower() == "s":
         print("\n¡Pago realizado con éxito! Gracias por su compra.")
+        opcionesFinanzasAdmin.registrarVenta(historial,nombreCliente,carrito)
         carrito.clear()
         return True
     else:
@@ -154,13 +155,12 @@ def resumen_compra(carrito):
         return False
 
 
-def menu_cliente(nombre_usuario, catalogo):
-    """ Muestra el menú de opciones para el usuario cliente y gestiona la interacción con el carrito de compras. """
-    carrito = []
-    activo = True
-    
-    while activo:
-        print("\n===== PANEL CLIENTE:", nombre_usuario.upper(), "=====")
+def menu_cliente(nombre_usuario, catalogo = catalogo_productos):
+    """Menú principal del cliente una vez autenticado."""
+    carrito = {}
+    historial = []
+    while True:
+        print(f"\n===== PANEL CLIENTE: {nombre_usuario.upper()} =====")
         print("[V] Ver catálogo completo")
         print("[B] Buscar productos (Regex)")
         print("[A] Agregar producto al carrito")
@@ -184,7 +184,7 @@ def menu_cliente(nombre_usuario, catalogo):
         elif opcion == "m":
             modificar_o_eliminar_carrito(carrito)
         elif opcion == "f":
-            resumen_compra(carrito)
+            resumen_compra(carrito,historial,nombre_usuario)
         elif opcion == "s":
             print("Cerrando sesión de cliente...")
             activo = False

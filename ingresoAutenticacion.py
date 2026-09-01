@@ -127,6 +127,7 @@ def ingresarAdministrador(listadoAdmins, buzonEmail):
     
     bandera = True
     intentos = 0
+    login_exitoso = False
         
     while bandera:
         nombre, contra = ingresoDatos()
@@ -140,6 +141,7 @@ def ingresarAdministrador(listadoAdmins, buzonEmail):
         
         if login_exitoso:
             bandera = False
+            opcionesUsuarioAdmin.menu_administrador()
         else:
             usuario = verificarLista(listadoAdmins, nombre)
             if usuario[1] != contra:
