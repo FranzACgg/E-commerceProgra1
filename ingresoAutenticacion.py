@@ -1,6 +1,8 @@
 import re
 import verificacionPorEmail
 import opcionesUsuarioCliente
+import opcionesUsuarioAdmin
+
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
     return bool(re.match(patron, contra))
