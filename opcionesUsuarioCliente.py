@@ -10,11 +10,9 @@ catalogo_productos = {
     105: {"nombre": "Galletitas Dulces", "precio": 800, "stock": 25}
 }
 
-# ========================================================
-# PARTE 3: Búsqueda con Regex y Sistema de Carrito
-# =========================================================
 
 def buscar_productos_regex(catalogo):
+    """ Permite al usuario buscar productos en el catálogo usando expresiones regulares."""
     patron_busqueda = input("\nIngrese el término a buscar (o expresión regular): ")
     encontrados = []
     
@@ -34,6 +32,7 @@ def buscar_productos_regex(catalogo):
 
 
 def mostrar_carrito(carrito):
+    """ Muestra el contenido del carrito de compras y el total acumulado. """
     print("\n--- CARRITO DE COMPRAS ---")
     if len(carrito) == 0:
         print("El carrito está vacío.")
@@ -52,6 +51,7 @@ def mostrar_carrito(carrito):
 
 
 def agregar_al_carrito(catalogo, carrito):
+    """ Permite al usuario agregar productos al carrito de compras. """
     try:
         id_prod = int(input("\nIngrese el ID del producto que desea agregar: "))
     except ValueError:
@@ -91,6 +91,7 @@ def agregar_al_carrito(catalogo, carrito):
 
 
 def modificar_o_eliminar_carrito(carrito):
+    """ Permite al usuario modificar la cantidad o eliminar productos del carrito. """
     if len(carrito) == 0:
         print("\nEl carrito está vacío, no hay elementos para modificar.")
         return
@@ -159,10 +160,10 @@ def menu_cliente(nombre_usuario, catalogo = catalogo_productos):
     historial = []
     while True:
         print(f"\n===== PANEL CLIENTE: {nombre_usuario.upper()} =====")
-        print("[B] Buscar productos (Regex)")
         print("[V] Ver catálogo completo")
-        print("[C] Ver carrito de compras")
+        print("[B] Buscar productos (Regex)")
         print("[A] Agregar producto al carrito")
+        print("[C] Ver carrito de compras")
         print("[M] Modificar / Eliminar producto del carrito")
         print("[F] Finalizar compra (Resumen y Checkout)")
         print("[S] Cerrar sesión y volver al inicio")
