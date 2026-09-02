@@ -34,7 +34,7 @@ def pedirCredencialesNuevas(listadoUsuarios):
 Contraseña: """ 
     nuevoUser = input("Bienvenido, coloque el nombre de su nueva cuenta: ")
     
-    while usuarioEnLista(nuevoUser, listadoUsuarios) or nuevoUser.strip() == "":
+    while usuarioEnLista(nuevoUser.lower(), listadoUsuarios) or nuevoUser.strip() == "":
         nuevoUser = input("Usuario ingresado inválido o ya existente, coloque otro nombre: ")
         
     contraUser = input(mensajeContrasenia)
@@ -42,7 +42,7 @@ Contraseña: """
         print("\nERROR: La contraseña no cumple con el formato requerido.")
         contraUser = input(mensajeContrasenia)
     
-    return nuevoUser, contraUser
+    return nuevoUser.lower(), contraUser
 
 def verificarDisponibilidad(lista):
     for usuario in lista:
@@ -92,7 +92,6 @@ def ingresarUsuario(listadoUsuarios):
         for usuarios in listadoUsuarios:
             if usuarios[0] == nombre and usuarios[1] == contra and nombre.strip() != "":
                 print("Bienvenido de vuelta usuario")
-                transicionInicio()
                 login_exitoso = True
                 break
         
@@ -138,7 +137,8 @@ def ingresarAdministrador(listadoAdmins, buzonEmail):
     while bandera:
         nombre, contra = ingresoDatos()
         login_exitoso = False
-            
+        
+        
         for usuarios in listadoAdmins:
             if usuarios[0] == nombre and usuarios[1] == contra and nombre.strip() != "":
                 print("Bienvenido de vuelta admin\n")

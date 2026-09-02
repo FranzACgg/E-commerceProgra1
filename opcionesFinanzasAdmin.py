@@ -65,7 +65,7 @@ def obtenerTotalGastadoCliente(historialVentas, nombre):
 
 
 def main(opcion):
-    historialPrueba = ["guest",[2026,8,14],[3, "Aceite Girasol 1.5L", "Almacén", 2500.0, 3, "Aceite puro comestible"],7500]
+    #historialPrueba = ["guest",[2026,8,14],[3, "Aceite Girasol 1.5L", "Almacén", 2500.0, 3, "Aceite puro comestible"],7500]
     while opcion != "3":
                 print("\n=== PANEL DE FINANZAS ===")
                 print("1. Historiales de clientes")

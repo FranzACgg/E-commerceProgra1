@@ -1,7 +1,6 @@
 import opcionesFinanzasAdmin
-"""
-Módulo: Catálogo de Productos y Administrador de Inventario
-Autor: Jonathan Burgos
+
+"""Explicacion de la estructura de la lista
 Estructura de cada producto (Lista):
 [0] ID (int)
 [1] Nombre (str)
