@@ -1,10 +1,13 @@
 def comprobarEmail(listadoAdmins):
+    """Comprueba si el que quiere crear una nueva cuenta admin, tiene el contacto del administrador
+    original
+    """
     verificacion = input("Por seguridad, antes de crear la cuenta, ingrese el email del administrador original: ")
     if verificacion != listadoAdmins[0][2]:
         print("El email es incorrecto.")
         return False
     else:
-        print("Se ha enviado una solicitud al buzón del administrador.")    
+        print("Complete el formulario para que se le envie una solicitud al buzón del administrador.")    
         return True   
 
 def cuentaPendienteVerificacion(user, contra):

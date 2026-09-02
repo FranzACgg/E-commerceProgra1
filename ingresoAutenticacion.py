@@ -2,6 +2,7 @@ import re
 import verificacionPorEmail
 import opcionesUsuarioCliente
 import opcionesUsuarioAdmin
+
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
     return bool(re.match(patron, contra))
@@ -38,7 +39,7 @@ Contraseña: """
         
     contraUser = input(mensajeContrasenia)
     while not validarContrasenia(contraUser):
-        print("\n[ERROR] La contraseña no cumple con el formato requerido.")
+        print("\nERROR: La contraseña no cumple con el formato requerido.")
         contraUser = input(mensajeContrasenia)
     
     return nuevoUser, contraUser
@@ -69,23 +70,21 @@ def registrarAdministrador(listadoAdmins, buzonEmail):
         print("Error: No se pudo verificar el email de administrador. No se creó la cuenta.")
 
 def ingresarUsuario(listadoUsuarios):
-    bandera = True
-    intentos = 0
-    
-    mensajeUsuario = """\n\t\t\t######## Bienvenido Usuario #########
-                          
-                          [Por favor ingrese su nombre y contraseña]\n"""
-                            
+    mensajeUsuario = """\n\t\t\t######## Bienvenido Usuario #########"""
     print(mensajeUsuario)
     
-    respuesta = input("¿Desea crear un nuevo usuario? Y/N: ")
-    if respuesta.lower() == "y":
+    print("\n[1] Crear cuenta nueva")
+    print("[2] Ingresar con cuenta ya creada")
+    opcion = input("Seleccione una opción: ")
+
+    if opcion == "1":
         registrarCliente(listadoUsuarios)
         transicionInicio()
-        bandera = False
-    elif respuesta.lower() == "n":
-        print("\nIngrese su cuenta creada anteriormente")
-        
+        return
+
+    intentos = 0
+    bandera = True
+    
     while bandera:
         nombre, contra = ingresoDatos()
         login_exitoso = False
@@ -106,29 +105,35 @@ def ingresarUsuario(listadoUsuarios):
                 print("Error al ingresar contraseña o usuario")
                 intentos += 1
                 
-                if intentos == 3:
-                    respuesta = input("Demasiados intentos fallidos. ¿Desea crear un nuevo usuario? Y/N: ")
-                    if respuesta.lower() == "y":
-                        registrarCliente(listadoUsuarios)
+                print("\n[1] Crear cuenta nueva")
+                print("[2] Reintentar ingreso")
+                opcion_fallo = input("Seleccione una opción: ")
+
+                if opcion_fallo == "1":
+                    registrarCliente(listadoUsuarios)
+                    transicionInicio()
+                    bandera = False
+                else:
+                    if intentos >= 6:
+                        print("Error: demasiados intentos fallidos. Volviendo al inicio.")
                         transicionInicio()
                         bandera = False
-                    elif respuesta.lower() == "n":
-                        print("Le quedan 3 intentos más, sino finalizará su sesión.")
-                
-                if intentos == 6:
-                    print("Error: demasiados intentos fallidos. Intente de nuevo más tarde.")    
-                    bandera = False
 
 def ingresarAdministrador(listadoAdmins, buzonEmail):
-    mensajeAdministrador = """\n\t\t\t############ Bienvenido Administrador #############
-                            
-                            [Por favor ingrese su nombre y contraseña]"""
-                                
+    mensajeAdministrador = """\n\t\t\t############ Bienvenido Administrador #############"""
     print(mensajeAdministrador)
     
-    bandera = True
+    print("\n[1] Crear cuenta nueva")
+    print("[2] Ingresar con cuenta ya creada")
+    opcion = input("Seleccione una opción: ")
+
+    if opcion == "1":
+        registrarAdministrador(listadoAdmins, buzonEmail)
+        transicionInicio()
+        return
+
     intentos = 0
-    login_exitoso = False
+    bandera = True
         
     while bandera:
         nombre, contra = ingresoDatos()
@@ -149,30 +154,31 @@ def ingresarAdministrador(listadoAdmins, buzonEmail):
                 print("Error al ingresar contraseña o usuario")
                 intentos += 1
                 
-                respuesta = input("¿Desea crear una nueva cuenta de administrador? Y/N: ")
+                print("\n[1] Crear cuenta nueva")
+                print("[2] Reintentar ingreso")
+                opcion_fallo = input("Seleccione una opción: ")
                 
-                if respuesta.lower() == "y":
+                if opcion_fallo == "1":
                     registrarAdministrador(listadoAdmins, buzonEmail)
                     transicionInicio()
                     bandera = False
-                elif respuesta.lower() == "n":
-                    print("\nIngrese la cuenta del administrador")
-                
-                if intentos >= 3:
-                    print("Error demasiados intentos, administrador incorrecto.")
-                    bandera = False
+                else:
+                    if intentos >= 3:
+                        print("Error demasiados intentos, administrador incorrecto. Volviendo al inicio.")
+                        transicionInicio()
+                        bandera = False
 
 def mensajeInicio():
     mensajeInicioText = """\t\t===============================================
                         Bienvenido al Supermercado Online
-                ==============================================="""
+                ============================================="""
     print(mensajeInicioText)
 
 def ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin):
     mensajeInicio()
     
-    print("""\n\t   ============== [Ingreso como usuario [u]] ================
-\t   ============== [Ingreso como administrador [a]] ============\n""")
+    print("""\n\t   ============== [ Ingreso como usuario [u] ] ================
+\t   ============== [ Ingreso como administrador [a] ] ============\n""")
     respuestaIngreso = input("Tipo de ingreso (Otras opciones: 'b' para buzón o 's' para salir): ")
     
     if respuestaIngreso.lower() == "u":
@@ -193,9 +199,9 @@ def ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contr
     return True
 
 def asignarAdmins(listadoAdmins):
-    nombreAdminPrincipal = "robertocarlos"
-    contraAdminPrincipal = "2219345GGez"
-    emailAdminPrincipal = "rcarlos@gmail.com"
+    nombreAdminPrincipal = "user"
+    contraAdminPrincipal = "123AA--"
+    emailAdminPrincipal = "user@gmail.com"
     
     listadoAdmins[0][0] = nombreAdminPrincipal
     listadoAdmins[0][1] = contraAdminPrincipal
@@ -213,5 +219,3 @@ def main():
 
     while bandera:
         bandera = ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin)
-
-
