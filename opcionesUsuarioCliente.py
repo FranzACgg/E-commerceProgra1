@@ -147,7 +147,7 @@ def resumen_compra(carrito,historial,nombreCliente):
     confirmar = input("¿Desea confirmar y simular el pago? (S/N): ")
     if confirmar.lower() == "s":
         print("\n¡Pago realizado con éxito! Gracias por su compra.")
-        historial = opcionesFinanzasAdmin.registrarVenta(nombreCliente,carrito)
+        #historial = opcionesFinanzasAdmin.registrarVenta(nombreCliente,carrito)
         
         carrito.clear()
         return True
@@ -158,7 +158,7 @@ def resumen_compra(carrito,historial,nombreCliente):
 
 def menu_cliente(nombre_usuario, catalogo = catalogo_productos):
     """Menú principal del cliente una vez autenticado."""
-    carrito = {}
+    carrito = []
     historial = []
     bandera = True
     while bandera:
