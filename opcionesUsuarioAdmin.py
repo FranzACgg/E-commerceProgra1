@@ -40,6 +40,7 @@ def listar_catalogo(productos):
     else:
         for prod in productos:
             mostrar_producto(prod)
+            print("\t")
     print("--------------------------------------------------------------------------------")
 
 
