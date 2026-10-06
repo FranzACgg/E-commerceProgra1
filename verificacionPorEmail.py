@@ -1,6 +1,6 @@
-def comprobarEmail(listadoAdmins):
+def comprobarEmail(administradores):
     verificacion = input("Por seguridad, antes de crear la cuenta, ingrese el email del administrador original: ")
-    if verificacion != listadoAdmins[0][2]:
+    if verificacion != administradores["user"]["email"]:
         print("El email es incorrecto.")
         return False
     else:
@@ -44,7 +44,7 @@ def mostrarBuzon(buzon):
         print(f"\t[{item[0]}]: {item[1]}")
     print("--------------------------------------------------------\n")
 
-def abrirEmail(bandeja, email, contra, listadoAdmins):
+def abrirEmail(bandeja, email, contra, administradores):
     mostrarIncioEmail()
     
     usuario = input("Ingrese su Email: ")
@@ -54,19 +54,19 @@ def abrirEmail(bandeja, email, contra, listadoAdmins):
         acceso = True
         while acceso:
             mostrarBuzon(bandeja)
-            acceso = opcionesEmail(bandeja, listadoAdmins)
+            acceso = opcionesEmail(bandeja, administradores)
     else:
         print("Credenciales de email incorrectas.")
 
-def opcionesEmail(bandeja, listadoAdmins):
+def opcionesEmail(bandeja, administradores):
     opciones = """
     Seleccionar email [s]
     Volver al menú inicial [v]
     """
     print(opciones)
-    return leerMensaje(bandeja, listadoAdmins)
+    return leerMensaje(bandeja, administradores)
 
-def leerMensaje(bandeja, listadoAdmins):
+def leerMensaje(bandeja, administradores):
     respuesta = input("Opción: ")
     if respuesta.lower() == "s":
         ubicacion = int(input("Ingresar número de mensaje (1-8): ")) - 1
@@ -85,7 +85,7 @@ def leerMensaje(bandeja, listadoAdmins):
                     if len(partes) >= 3:
                         nuevo_u = partes[1]
                         nueva_c = partes[2]
-                        listadoAdmins.append([nuevo_u, nueva_c, "admin@gmail.com"])
+                        administradores[nuevo_u] = {"contraseña":nueva_c,"email": "admin@gmail.com"}
                         print(f"El usuario '{nuevo_u}' fue agregado a la lista de Administradores.")
                     
                     bandeja[ubicacion][1] = " "  
