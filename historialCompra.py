@@ -11,23 +11,32 @@ def calcularTotalCarrito(carrito):
     """calcula el total a pagar de la lista del carrito"""
     if not carrito:
         return 0.0
-    subtotales=list(map(lambda producto:producto[3]*producto[4],carrito))
+    subtotales=list(map(lambda producto:producto["precio"]*producto["cantidad"],carrito))
     total=reduce(lambda acumulador,subtotal:acumulador + subtotal, subtotales,0.0)
     return round(total,2)
 
-def registrarVenta(nombreCliente,carrito,historialVentas):
+def registrarVenta(nombreCliente,IDventa,carrito,historialVentas):
     """Agrega una nueva venta confirmada al historial general de transacciones.
     Retorna el historial actualizado"""
     totalVenta=calcularTotalCarrito(carrito)
     fecha = date.today()
     lista_fecha = [fecha.year,fecha.month,fecha.day]
-    nuevaVenta=[nombreCliente,lista_fecha,carrito,totalVenta]
+    nuevaVenta={
+        
+        "IDventa": IDventa,
+        "cliente": nombreCliente,
+        "fecha": fecha,
+        "producto": carrito,
+        "total": totalVenta
+    }
     
-    return historialVentas.append(nuevaVenta)
+    historialVentas[IDventa]=nuevaVenta
+    
+    return historialVentas
 
 def obtenerHistorialCliente(historialVentas,nombre):
     """muestra el historial de compras de un cliente"""
-    return list(filter(lambda venta:venta[0].lower()==nombre.lower(),historialVentas))
+    return list(filter(lambda venta:venta["cliente"].lower()==nombre.lower(),historialVentas.values()))
 
 def calcularRecaudacionTotal(historialVentas):
     """
@@ -36,7 +45,7 @@ def calcularRecaudacionTotal(historialVentas):
     if not historialVentas:
         return 0.0
     
-    montos = list(map(lambda venta: venta[3], historialVentas))
+    montos = list(map(lambda venta: venta["total"], historialVentas.values()))
     total_acumulado = reduce(lambda acumulado, monto: acumulado + monto, montos, 0.0)
     return round(total_acumulado, 2)
 
@@ -44,12 +53,12 @@ def calcularRecaudacionFecha(historialVentas, fechaBusqueda):
     """
     Calcula el total recaudado en una fecha específica
     """
-    ventasFecha = list(filter(lambda venta: venta[1] == fechaBusqueda, historialVentas))
+    ventasFecha = list(filter(lambda venta: venta["fecha"] == fechaBusqueda, historialVentas.values()))
     
     if not ventasFecha:
         return 0.0
     
-    montosFecha = list(map(lambda venta: venta[3], ventasFecha))
+    montosFecha = list(map(lambda venta: venta["total"], ventasFecha))
     return round(reduce(lambda acum, monto: acum + monto, montosFecha, 0.0), 2)
 
 def obtenerTotalGastadoCliente(historialVentas, nombre):
@@ -60,5 +69,5 @@ def obtenerTotalGastadoCliente(historialVentas, nombre):
     if not ventasCliente:
         return 0.0
     
-    montosCliente = list(map(lambda venta: venta[3], ventasCliente))
+    montosCliente = list(map(lambda venta: venta["total"], ventasCliente))
     return round(reduce(lambda acum, monto: acum + monto, montosCliente, 0.0), 2)
