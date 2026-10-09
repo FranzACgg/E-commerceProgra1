@@ -10,11 +10,11 @@ def validarContrasenia(contra):
 def ingresoDatos():
     nombre = input("Nombre: ")
     contraseña = input("Contraseña: ")
-    return nombre, contraseña
+    return nombre.lower(), contraseña
 
 def transicionInicio():
     print("Volviendo al inicio...")
-    input("[Presione Enter para continuar]")
+    input("[Presione Enter para continuar]\n")
 
 def usuarioEnLista(nombre, registro):
     return True if nombre in registro else False
@@ -34,15 +34,10 @@ Contraseña: """
     while not validarContrasenia(contra):
         print("\nERROR: La contraseña no cumple con el formato requerido.")
         contra = input(mensajeContrasenia)
+        
+    print("")
     
     return nuevo.lower(), contra
-"""
-def verificarDisponibilidad(lista):
-    for usuario in lista:
-        if usuario[0] == " ":
-            return usuario
-    return ["", ""]
-"""
 
 def registrarCliente(clientes):
     cliente, contra = pedirCredencialesNuevas(clientes)
@@ -65,28 +60,35 @@ def ingresarUsuario(clientes):
     print("[2] Ingresar con cuenta ya creada")
     opcion = input("Seleccione una opción: ")
 
+    print("")   
+     
     if opcion == "1":
         registrarCliente(clientes)
         transicionInicio()
+        
         return
-
-    print("Tenes 3 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio")
-            
-    validarIngresoCliente(clientes)
     
+    if opcion == "2":
+        print("Tenes 4 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio")
+        validarIngresoCliente(clientes)
+        
+    else:
+        print("Error de ingreso, llevando denuevo al incio")    
+        transicionInicio()
+        print(" ")    
+        
 def validarIngresoCliente(clientes): 
     intentos = 0
     bandera = True
     
     while bandera:
         nombre, contra = ingresoDatos()
-
         
         if nombre in clientes:
             if clientes[nombre] == contra:
                 print("Bienvenido de vuelta usuario")
                 bandera = False
-                verificacionPorEmail.opcionesUsuarioCliente.menu_cliente(nombre)
+                #opcionesUsuarioCliente.menu_cliente(nombre)
         
         if intentos == 3:
             print("Error: demasiados intentos fallidos. Volviendo al inicio.")
@@ -94,8 +96,8 @@ def validarIngresoCliente(clientes):
             bandera = False
 
         else:   
-                print("Error al ingresar contraseña o usuario")
-                intentos += 1
+            print("Error al ingresar contraseña o usuario")
+            intentos += 1
                 
 
 
@@ -111,33 +113,38 @@ def ingresarAdministrador(administradores, buzonEmail):
         registrarAdministrador(administradores, buzonEmail)
         transicionInicio()
         return
-    
-    print("Tenes 3 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio")
+
+    if opcion == "2":
+        print("Tenes 4 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio")
             
-    validarIngresoAdmin(administradores)
+        validarIngresoAdmin(administradores)
     
+    else:
+        print("Error de ingreso, ingrese denuevo la opcion")    
+        transicionInicio()    
     
 def validarIngresoAdmin(administradores):
     intentos = 0
     bandera = True
         
     while bandera:
+            
             nombre, contra = ingresoDatos()
             
-            if nombre in administradores[nombre]:
-                if administradores[nombre] == contra:
+            if nombre in administradores:
+                if administradores[nombre]["contraseña"] == contra:
                     print("Bienvenido de vuelta administrador")
                     bandera = False
-                    verificacionPorEmail.opcionesUsuarioAdmin.menu_cliente(nombre)
-                    
+                    #opcionesUsuarioAdmin.menu_cliente(nombre) 
+                
             if intentos == 3:
                 print("Error: demasiados intentos fallidos. Volviendo al inicio.")
                 transicionInicio()
                 bandera = False
-            else:   
-                    print("Error al ingresar contraseña o usuario")
-                    intentos += 1
-                    
+                
+            if nombre not in administradores or administradores[nombre]["contraseña"] != contra:  
+                print("Error al ingresar contraseña o usuario")
+                intentos += 1    
     
 def mensajeInicio():
     mensajeInicioText = """\t\t===============================================
@@ -165,8 +172,12 @@ def ingresoGeneral(clientes, administradores, buzonEmail):
         return True
         
     if respuestaIngreso.lower() == "s":    
-        return False 
-
+        return False
+    
+    else:
+        print("Error al ingresar la opcion, intente denuevo")
+        transicionInicio()
+    
     return True
 
 def main():

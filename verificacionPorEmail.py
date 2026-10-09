@@ -1,10 +1,14 @@
 def comprobarEmail(administradores):
     verificacion = input("Por seguridad, antes de crear la cuenta, ingrese el email del administrador original: ")
     if verificacion != administradores["user"]["email"]:
-        print("El email es incorrecto.")
+        print("\nEl email es incorrecto.")
         return False
     else:
-        print("Se ha enviado una solicitud al buzón del administrador.")    
+        print("\n\t----------------------------------------------------------------------")
+        print("\tVerificacion del email completada, puede proceder al siguiente paso")
+        print("\t----------------------------------------------------------------------")
+        input("\t\t\t  [Presione Enter para continuar]\n")
+        
         return True   
 
 def cuentaPendienteVerificacion(user, contra):
@@ -27,7 +31,7 @@ def cargarMensaje(bandejaEmail, mensaje):
         print("El buzón de correo está lleno (máximo 8 mensajes).")
 
 def crearBuzon():
-    estructuraBuzon = [[" " for _ in range(2)] for _ in range(8)]
+    estructuraBuzon = [[" " for aux in range(2)] for aux in range(8)]
     for i in range(8):
         estructuraBuzon[i][0] = i + 1
     return estructuraBuzon
@@ -76,24 +80,9 @@ def leerMensaje(bandeja, administradores):
             else:
                 contenido_mensaje = bandeja[ubicacion][1]
                 print(f"Mensaje: {contenido_mensaje}")
-                confirmar = input("¿Desea permitir que se apruebe esta solicitud? (y/n): ")
                 
-                if confirmar.lower() == "y":
-                    print("Solicitud aprobada.")
-                    # Extraer credenciales del mensaje ("Pedido de  para el usuario:USER:CONTRA")
-                    partes = contenido_mensaje.split(":")
-                    if len(partes) >= 3:
-                        nuevo_u = partes[1]
-                        nueva_c = partes[2]
-                        administradores[nuevo_u] = {"contraseña":nueva_c,"email": "admin@gmail.com"}
-                        print(f"El usuario '{nuevo_u}' fue agregado a la lista de Administradores.")
-                    
-                    bandeja[ubicacion][1] = " "  
-                    
-                elif confirmar.lower() == "n":
-                    print("Solicitud desaprobada.")
-                    bandeja[ubicacion][1] = " "  
-                    
+                aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion)           
+        
                 return volverInicio()
         else:
             print("Número fuera de rango.")
@@ -103,8 +92,39 @@ def leerMensaje(bandeja, administradores):
         
     return True
 
+def aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion):
+    bandera = True    
+    while bandera:
+        confirmar = input("¿Desea permitir que se apruebe esta solicitud? (y/n): ")
+
+        if confirmar.lower() == "y":
+            print("Solicitud aprobada.")
+            # Extraer credenciales del mensaje ("Pedido de  para el usuario:USER:CONTRA")
+            partes = contenido_mensaje.split(":")
+            if len(partes) >= 3:
+                nuevo_u = partes[1]
+                nueva_c = partes[2]
+                administradores[nuevo_u] = {"contraseña":nueva_c,"email": "admin@gmail.com"}
+                print(f"El usuario '{nuevo_u}' fue agregado a la lista de Administradores.")
+            
+            bandeja[ubicacion][1] = " "  
+            bandera = False
+            
+        elif confirmar.lower() == "n":
+            print("Solicitud desaprobada.")
+            bandeja[ubicacion][1] = " "  
+            bandera = False
+            
+        else:
+            print("Opcion incorrecta, ingrese denuevo su eleccion")
+
 def volverInicio():
-    respuesta = input("¿Desea realizar otra operación en el buzón? (Y/N): ")
+    print("")
+    respuesta = input("¿Desea realizar otra operación en el buzón? (y/n): ")
     if respuesta.lower() == "n":
         return False
-    return True
+    elif respuesta.lower() == "y":
+        return True
+    else:
+        print("La opcion ingresada es incorrecta se volvera al buzon")
+        return True
