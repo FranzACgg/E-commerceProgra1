@@ -2,36 +2,33 @@ from functools import reduce
 from datetime import date
 
 
-""""
-Funciones no implementadas, aplicacion lista para cuando se trabajen con archivos JSON
-en donde se registrara el historial de cada cliente (Su resumen de compra) y se usara
-para otras funcioness
-"""
-def calcularTotalCarrito(carrito):
-    """calcula el total a pagar de la lista del carrito"""
-    if not carrito:
-        return 0.0
-    subtotales=list(map(lambda producto:producto["precio"]*producto["cantidad"],carrito))
-    total=reduce(lambda acumulador,subtotal:acumulador + subtotal, subtotales,0.0)
-    return round(total,2)
 
-def registrarVenta(nombreCliente,IDventa,carrito,historialVentas):
+
+def empaquetarProductoTupla(productoCarrito):
+    """Convierte el producto del carrito a una tupla inmutable para el registro histórico:
+    (id, nombre, precio_unitario, cantidad, subtotal)"""
+    subtotal=round(productoCarrito["precio"]*productoCarrito["cantidad"],2)
+    return (productoCarrito["ID"],productoCarrito["nombre"],productoCarrito["precio"],productoCarrito["cantidad"],subtotal)
+
+def registrarVenta(nombreCliente,IDventa,fecha,carrito,historialVentas):
     """Agrega una nueva venta confirmada al historial general de transacciones.
     Retorna el historial actualizado"""
-    totalVenta=calcularTotalCarrito(carrito)
-    fecha = date.today()
-    lista_fecha = [fecha.year,fecha.month,fecha.day]
+    
+    if not carrito:
+        return historialVentas
+    
+    productosTuplas=list(map(empaquetarProductoTupla,carrito.values()))
+    totalVenta = round(reduce(lambda acum, t: acum + t[4], productosTuplas, 0.0), 2)
     nuevaVenta={
         
         "IDventa": IDventa,
         "cliente": nombreCliente,
         "fecha": fecha,
-        "producto": carrito,
+        "producto": productosTuplas,
         "total": totalVenta
     }
     
     historialVentas[IDventa]=nuevaVenta
-    
     return historialVentas
 
 def obtenerHistorialCliente(historialVentas,nombre):
@@ -71,3 +68,27 @@ def obtenerTotalGastadoCliente(historialVentas, nombre):
     
     montosCliente = list(map(lambda venta: venta["total"], ventasCliente))
     return round(reduce(lambda acum, monto: acum + monto, montosCliente, 0.0), 2)
+
+
+
+#carrito a modo de ejemplo para probar las funciones
+carrito = {
+    101: {
+        "id": 101,
+        "nombre": "Arroz 1kg",
+        "precio": 1200.0,
+        "cantidad": 2
+    },
+    102: {
+        "id": 102,
+        "nombre": "Leche Entera 1L",
+        "precio": 1100.0,
+        "cantidad": 3
+    },
+    205: {
+        "id": 205,
+        "nombre": "Aceite Girasol 1.5L",
+        "precio": 2800.0,
+        "cantidad": 1
+    }
+}
