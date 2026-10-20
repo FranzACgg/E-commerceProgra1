@@ -1,6 +1,7 @@
 def comprobarEmail(administradores):
+    print("")
     verificacion = input("Por seguridad, antes de crear la cuenta, ingrese el email del administrador original: ")
-    if verificacion != administradores["user"]["email"]:
+    if verificacion != administradores["user"]["email"][0]:
         print("\nEl email es incorrecto.")
         return False
     else:
