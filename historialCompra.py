@@ -92,3 +92,17 @@ carrito = {
         "cantidad": 1
     }
 }
+
+def obtenerClientesUnicos(historialVentas):
+    """
+    Retorna un conjunto con todos los clientes únicos que compraron.
+    Elimina automáticamente duplicados sin necesidad de bucles tradicionales.
+    """
+    return set(map(lambda venta: venta["cliente"], historialVentas.values()))
+
+
+def obtenerFechasConVentas(historialVentas):
+    """
+    Retorna un conjunto con las fechas únicas en las que hubo ventas registradas.
+    """
+    return set(map(lambda venta: venta["fecha"], historialVentas.values()))
