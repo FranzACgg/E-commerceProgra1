@@ -7,8 +7,26 @@ from datetime import date
 def empaquetarProductoTupla(productoCarrito):
     """Convierte el producto del carrito a una tupla inmutable para el registro histórico:
     (id, nombre, precio_unitario, cantidad, subtotal)"""
-    subtotal=round(productoCarrito["precio"]*productoCarrito["cantidad"],2)
-    return (productoCarrito["ID"],productoCarrito["nombre"],productoCarrito["precio"],productoCarrito["cantidad"],subtotal)
+    
+    try:
+        id_prod = productoCarrito["id"]
+        nombre = str(productoCarrito["nombre"])
+        precio = float(productoCarrito["precio"])
+        cantidad = int(productoCarrito["cantidad"])
+        
+        if precio < 0 or cantidad<=0:
+            raise ValueError("recio o cantidad con valores fuera de rango")
+    
+        subtotal=round(precio * cantidad,2)
+        return (id_prod,nombre,precio,cantidad,subtotal)
+    
+    except KeyError as error_clave:
+        print(f"Error en estructura de producto: falta la clave {error_clave}")
+        return None
+    
+    except (ValueError, TypeError) as error_tipo:
+        print(f"Error en datos del producto: {error_tipo}")
+        return None
 
 def registrarVenta(nombreCliente,IDventa,fecha,carrito,historialVentas):
     """Agrega una nueva venta confirmada al historial general de transacciones.
@@ -17,7 +35,13 @@ def registrarVenta(nombreCliente,IDventa,fecha,carrito,historialVentas):
     if not carrito:
         return historialVentas
     
-    productosTuplas=list(map(empaquetarProductoTupla,carrito.values()))
+    tuplas_generadas = list(map(empaquetarProductoTupla, carrito.values()))
+    
+    productosTuplas = list(filter(lambda item: item is not None, tuplas_generadas))
+    
+    if not productosTuplas:
+        print("No se pudo registrar la venta: el carrito no contiene productos válidos.")
+        return historialVentas
     totalVenta = round(reduce(lambda acum, t: acum + t[4], productosTuplas, 0.0), 2)
     nuevaVenta={
         
@@ -34,6 +58,16 @@ def registrarVenta(nombreCliente,IDventa,fecha,carrito,historialVentas):
 def obtenerHistorialCliente(historialVentas,nombre):
     """muestra el historial de compras de un cliente"""
     return list(filter(lambda venta:venta["cliente"].lower()==nombre.lower(),historialVentas.values()))
+
+def consultarVentaPorID(historialVentas, IDventa):
+    """
+    Busca una venta por su ID
+    """
+    try:
+        return historialVentas[IDventa]
+    except KeyError:
+        print(f"Aviso: La transacción '{IDventa}' no existe en el registro.")
+        return None
 
 def calcularRecaudacionTotal(historialVentas):
     """
