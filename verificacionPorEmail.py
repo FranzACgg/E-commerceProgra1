@@ -74,23 +74,26 @@ def opcionesEmail(bandeja, administradores):
 def leerMensaje(bandeja, administradores):
     respuesta = input("Opción: ")
     if respuesta.lower() == "s":
-        ubicacion = int(input("Ingresar número de mensaje (1-8): ")) - 1
-        if 0 <= ubicacion < len(bandeja):
-            if bandeja[ubicacion][1] == " ":
-                print("No hay ningún mensaje en esta posición.")
+        try:
+            ubicacion = int(input("Ingresar número de mensaje (1-8): ")) - 1
+            if 0 <= ubicacion < len(bandeja):
+                if bandeja[ubicacion][1] == " ":
+                    print("No hay ningún mensaje en esta posición.")
+                else:
+                    contenido_mensaje = bandeja[ubicacion][1]
+                    print(f"Mensaje: {contenido_mensaje}")
+                    
+                    aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion)           
+
+                    return volverInicio()
             else:
-                contenido_mensaje = bandeja[ubicacion][1]
-                print(f"Mensaje: {contenido_mensaje}")
-                
-                aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion)           
-        
-                return volverInicio()
-        else:
-            print("Número fuera de rango.")
+                print("Número fuera de rango.")
+        except ValueError:
+            print("\n[NO SE PERMITEN LETRAS O SIMBOLOS COMO RESPUESTA]\n")       
             
     elif respuesta.lower() == "v":
         return False
-        
+            
     return True
 
 def aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion):

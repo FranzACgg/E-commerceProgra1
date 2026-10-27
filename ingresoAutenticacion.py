@@ -89,7 +89,7 @@ def ingresarUsuario(clientes):
                 validarIngresoCliente(clientes)
                 
         except ValueError:
-            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN CARACTERES]\n")
+            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN LETRAS O SIMBOLOS]\n")
             
             
             
@@ -141,7 +141,7 @@ def ingresarAdministrador(administradores, buzonEmail,clientes):
                 validarIngresoAdmin(administradores)
                     
         except ValueError:
-            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN CARACTERES]\n")
+            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN LETRAS O SIMBOLOS]\n")
             continue
         
 def validarIngresoAdmin(administradores):
