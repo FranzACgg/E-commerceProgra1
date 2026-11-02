@@ -1,7 +1,12 @@
 import re
 import verificacionPorEmail
+import json
+import os
 #import opcionesUsuarioCliente
 #import opcionesUsuarioAdmin
+
+ARCHIVO_ADMINS = "admins.json"
+ARCHIVO_CLIENTES = "clientes.json"
 
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
@@ -49,6 +54,8 @@ def registrarCliente(clientes):
         nombre, contra = pedirCredencialesNuevas(clientes)
     
     clientes[nombre] = contra
+    actualizarDatosClientes(clientes)
+    
     print("Se creó su usuario correctamente.")
         
         
@@ -192,6 +199,7 @@ def ingresoGeneral(clientes, administradores, buzonEmail):
             
     if respuestaIngreso.lower() == "b":
         verificacionPorEmail.abrirEmail(buzonEmail, administradores["user"]["email"][0],  administradores["user"]["contraseña"], clientes)
+        actualizarDatosAdmins(administradores)
         return True
         
     if respuestaIngreso.lower() == "s":    
@@ -203,11 +211,42 @@ def ingresoGeneral(clientes, administradores, buzonEmail):
     
     return True
 
+def crearBaseDatos():
+    
+    clientes = {}
+    administradores = {
+        "user":{"contraseña":"123AA--","email":("user@gmail.com",)}}
+    
+    if not os.path.exists(ARCHIVO_ADMINS):
+        with open(ARCHIVO_ADMINS,"w",encoding="utf-8") as f:
+            json.dump(administradores,f,indent=4)
+
+        with open(ARCHIVO_CLIENTES,"w",encoding="utf-8") as f:
+                json.dump(clientes,f,indent=4)
+
+def leerDatosAdmins():
+    with open(ARCHIVO_ADMINS,"r",encoding="utf-8") as f:
+            administradores = json.load(f)
+    return administradores
+
+def leerDatosCLientes():
+    with open(ARCHIVO_CLIENTES,"r",encoding="utf-8") as f:
+                clientes = json.load(f)
+    return clientes
+
+def actualizarDatosAdmins(admins):
+    with open(ARCHIVO_ADMINS,"w",encoding="utf-8") as f:
+        json.dump(admins,f,indent=4)
+
+def actualizarDatosClientes(clientes):
+    with open(ARCHIVO_CLIENTES,"w",encoding="utf-8") as f:
+        json.dump(clientes,f,indent=4)
+
 def main():
     bandera = True
-    
-    administradores = {"user":{"contraseña":"123AA--","email":("user@gmail.com",)}}
-    clientes = {}
+    crearBaseDatos()
+    administradores = leerDatosAdmins()
+    clientes = leerDatosCLientes()
     
     buzonEmail = verificacionPorEmail.crearBuzon()
     

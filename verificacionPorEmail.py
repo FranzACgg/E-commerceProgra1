@@ -103,12 +103,13 @@ def aprobarSolicitud(contenido_mensaje,administradores,bandeja,ubicacion):
 
         if confirmar.lower() == "y":
             print("Solicitud aprobada.")
-            # Extraer credenciales del mensaje ("Pedido de  para el usuario:USER:CONTRA")
+            
             partes = contenido_mensaje.split(":")
             if len(partes) >= 3:
                 nuevo_u = partes[1]
                 nueva_c = partes[2]
                 administradores[nuevo_u] = {"contraseña":nueva_c,"email": "admin@gmail.com"}
+                
                 print(f"El usuario '{nuevo_u}' fue agregado a la lista de Administradores.")
             
             bandeja[ubicacion][1] = " "  
