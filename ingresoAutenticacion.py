@@ -1,7 +1,12 @@
 import re
 import verificacionPorEmail
+import json
+import os
 import opcionesUsuarioCliente
 import opcionesUsuarioAdmin
+
+ARCHIVO_ADMINS = "admins.json"
+ARCHIVO_CLIENTES = "clientes.json"
 
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
@@ -9,172 +14,175 @@ def validarContrasenia(contra):
 
 def ingresoDatos():
     nombre = input("Nombre: ")
-    contrasenia = input("Contraseña: ")
-    return nombre, contrasenia
-
-def verificarLista(lista, nombre):
-    for usuarios in lista:
-        if usuarios[0] == nombre:
-            return usuarios
-    return ["", ""]
+    contraseña = input("Contraseña: ")
+    return nombre.lower(), contraseña
 
 def transicionInicio():
     print("Volviendo al inicio...")
-    input("[Presione Enter para continuar]")
+    input("[Presione Enter para continuar]\n")
 
-def usuarioEnLista(nombre, lista):
-    filtrado = list(filter(lambda x: x[0] == nombre, lista)) 
-    return len(filtrado) > 0
+def usuarioEnLista(nombre, registro):
+    return True if nombre in registro else False
 
-def pedirCredencialesNuevas(listadoUsuarios):
-    mensajeContrasenia = """##### Ingrese su contraseña, debe contener ##### 
+def pedirCredencialesNuevas(registro):
+    mensajeContrasenia = """\n##### Ingrese su contraseña, debe contener ##### 
  - 2 Letras mayúsculas 
  - 2 Símbolos 
  - 2 Números
-Contraseña: """ 
-    nuevoUser = input("Bienvenido, coloque el nombre de su nueva cuenta: ")
+Contraseña: """
+ 
+    print("")
+    nuevo = input("Bienvenido, coloque el nombre de su nueva cuenta: ")
     
-    while usuarioEnLista(nuevoUser.lower(), listadoUsuarios) or nuevoUser.strip() == "":
-        nuevoUser = input("Usuario ingresado inválido o ya existente, coloque otro nombre: ")
+    while nuevo in registro or nuevo.strip() == "":
+        nuevo = input("Usuario ingresado inválido o ya existente, coloque otro nombre: ")
         
-    contraUser = input(mensajeContrasenia)
-    while not validarContrasenia(contraUser):
+    contra = input(mensajeContrasenia)
+    while not validarContrasenia(contra):
         print("\nERROR: La contraseña no cumple con el formato requerido.")
-        contraUser = input(mensajeContrasenia)
+        contra = input(mensajeContrasenia)
+        
+    print("")
     
-    return nuevoUser.lower(), contraUser
+    return nuevo.lower(), contra
 
-def verificarDisponibilidad(lista):
-    for usuario in lista:
-        if usuario[0] == " ":
-            return usuario
-    return ["", ""]
-
-def registrarCliente(listadoUsuarios):
-    user, contra = pedirCredencialesNuevas(listadoUsuarios)
-    usuarioVacio = verificarDisponibilidad(listadoUsuarios)
+def registrarCliente(clientes):
+    nombre, contra = pedirCredencialesNuevas(clientes)
     
-    if usuarioVacio == ["", ""]:
-        listadoUsuarios.append([user, contra])
-    else:
-        usuarioVacio[0], usuarioVacio[1] = user, contra
+    while usuarioEnLista(nombre,clientes):
+        print("El nombre ingresado ya esta en uso, ingrese otro nombre.")
+        nombre, contra = pedirCredencialesNuevas(clientes)
+    
+    clientes[nombre] = contra
+    actualizarDatosClientes(clientes)
     
     print("Se creó su usuario correctamente.")
-
-def registrarAdministrador(listadoAdmins, buzonEmail):
-    if verificacionPorEmail.comprobarEmail(listadoAdmins):
-        user, contra = pedirCredencialesNuevas(listadoAdmins)
+        
+        
+def registrarAdministrador(administradores, buzonEmail, clientes):
+    if verificacionPorEmail.comprobarEmail(administradores):
+        user, contra = pedirCredencialesNuevas(administradores)
+        
+        while user in clientes:
+            print("[LA CUENTA INGRESADA YA ESTA EN USO, INGRESE NUEVAMENTE LAS CREDENCIALES]")
+            user, contra = pedirCredencialesNuevas(administradores)
+            
         mensaje = verificacionPorEmail.cuentaPendienteVerificacion(user, contra)
         verificacionPorEmail.cargarMensaje(buzonEmail, mensaje)
     else:
         print("Error: No se pudo verificar el email de administrador. No se creó la cuenta.")
 
-def ingresarUsuario(listadoUsuarios):
-    mensajeUsuario = """\n\t\t\t######## Bienvenido Usuario #########"""
-    print(mensajeUsuario)
+def ingresarUsuario(clientes):
+    mensajeCliente = """\n\t\t\t######## Bienvenido Cliente #########"""
+    print(mensajeCliente)
     
-    print("\n[1] Crear cuenta nueva")
-    print("[2] Ingresar con cuenta ya creada")
-    opcion = input("Seleccione una opción: ")
-
-    if opcion == "1":
-        registrarCliente(listadoUsuarios)
-        transicionInicio()
-        return
-
+    esperandoRespuesta = True
+        
+    while esperandoRespuesta:
+        try:
+            print("\n[1] Crear cuenta nueva")
+            print("[2] Ingresar con cuenta ya creada")
+            opcion = int(input("Seleccione una opción: "))   
+            
+            if opcion == 1:
+                esperandoRespuesta = False
+                registrarCliente(clientes)
+                transicionInicio()
+                return
+            
+            if opcion == 2:
+                esperandoRespuesta = False
+                print("Tenes 4 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio")
+                validarIngresoCliente(clientes)
+                
+        except ValueError:
+            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN LETRAS O SIMBOLOS]\n")
+            
+            
+            
+def validarIngresoCliente(clientes): 
     intentos = 0
     bandera = True
     
     while bandera:
         nombre, contra = ingresoDatos()
-        login_exitoso = False
         
-        for usuarios in listadoUsuarios:
-            if usuarios[0] == nombre and usuarios[1] == contra and nombre.strip() != "":
+        if usuarioEnLista(nombre,clientes):
+            if clientes[nombre] == contra:
                 print("Bienvenido de vuelta usuario")
-                login_exitoso = True
-                break
+                bandera = False
+                opcionesUsuarioCliente.menu_cliente(nombre)
         
-        if login_exitoso:
+        if intentos == 3:
+            print("\nError: demasiados intentos fallidos.")
+            transicionInicio()
             bandera = False
-            opcionesUsuarioCliente.menu_cliente(nombre)
-        else:
-            usuario = verificarLista(listadoUsuarios, nombre)
-            if usuario[1] != contra:   
-                print("Error al ingresar contraseña o usuario")
-                intentos += 1
+
+        else:   
+            print("\n[Error al ingresar contraseña o usuario]\n")
+            intentos += 1
                 
-                print("\n[1] Crear cuenta nueva")
-                print("[2] Reintentar ingreso")
-                opcion_fallo = input("Seleccione una opción: ")
 
-                if opcion_fallo == "1":
-                    registrarCliente(listadoUsuarios)
-                    transicionInicio()
-                    bandera = False
-                else:
-                    if intentos >= 6:
-                        print("Error: demasiados intentos fallidos. Volviendo al inicio.")
-                        transicionInicio()
-                        bandera = False
 
-def ingresarAdministrador(listadoAdmins, buzonEmail):
+def ingresarAdministrador(administradores, buzonEmail,clientes):
     mensajeAdministrador = """\n\t\t\t############ Bienvenido Administrador #############"""
     print(mensajeAdministrador)
     
-    print("\n[1] Crear cuenta nueva")
-    print("[2] Ingresar con cuenta ya creada")
-    opcion = input("Seleccione una opción: ")
+    esperandoRespuesta = True
+    
+    while esperandoRespuesta:
+        try:    
+            print("\n[1] Crear cuenta nueva")
+            print("[2] Ingresar con cuenta ya creada")
+            opcion = int(input("Seleccione una opción: "))
+            
+            if opcion == 1:
+                esperandoRespuesta = False
+                registrarAdministrador(administradores, buzonEmail,clientes)
+                transicionInicio()
+                return
 
-    if opcion == "1":
-        registrarAdministrador(listadoAdmins, buzonEmail)
-        transicionInicio()
-        return
-
+            if opcion == 2:
+                print("\nTenes 4 intentos para ingresar correctamente, de lo contrario, sera llevado a la pantalla de incio") 
+                esperandoRespuesta = False
+                validarIngresoAdmin(administradores)
+                    
+        except ValueError:
+            print("\n[INGRESE UNA OPCION VALIDA, NO SE PERMITEN LETRAS O SIMBOLOS]\n")
+            continue
+        
+def validarIngresoAdmin(administradores):
     intentos = 0
     bandera = True
         
     while bandera:
-        nombre, contra = ingresoDatos()
-        login_exitoso = False
-        
-        
-        for usuarios in listadoAdmins:
-            if usuarios[0] == nombre and usuarios[1] == contra and nombre.strip() != "":
-                print("Bienvenido de vuelta admin\n")
-                login_exitoso = True
-                break
-        
-        if login_exitoso:
-            bandera = False
-            opcionesUsuarioAdmin.menu_administrador()
-        else:
-            usuario = verificarLista(listadoAdmins, nombre)
-            if usuario[1] != contra:
-                print("Error al ingresar contraseña o usuario")
-                intentos += 1
-                
-                print("\n[1] Crear cuenta nueva")
-                print("[2] Reintentar ingreso")
-                opcion_fallo = input("Seleccione una opción: ")
-                
-                if opcion_fallo == "1":
-                    registrarAdministrador(listadoAdmins, buzonEmail)
-                    transicionInicio()
+            
+            nombre, contra = ingresoDatos()
+            
+            if usuarioEnLista(nombre,administradores):
+                if administradores[nombre]["contraseña"] == contra:
+                    print("Bienvenido de vuelta administrador")
                     bandera = False
-                else:
-                    if intentos >= 3:
-                        print("Error demasiados intentos, administrador incorrecto. Volviendo al inicio.")
-                        transicionInicio()
-                        bandera = False
-
+                    opcionesUsuarioAdmin.menu_cliente(nombre) 
+                
+            if intentos == 3:
+                print("\nError: demasiados intentos fallidos.")
+                transicionInicio()
+                bandera = False
+                
+            if nombre not in administradores or administradores[nombre]["contraseña"] != contra:  
+                print("\n[Error al ingresar contraseña o usuario]\n")
+                intentos += 1    
+    
 def mensajeInicio():
-    mensajeInicioText = """\t\t===============================================
-                        Bienvenido al Supermercado Online
-                ============================================="""
+    mensajeInicioText = """\t\t  ===============================================
+                        
+                      ---BIENVENIDO AL SUPERMERCADO ONLINE---
+        
+                  ============================================="""
     print(mensajeInicioText)
 
-def ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin):
+def ingresoGeneral(clientes, administradores, buzonEmail):
     mensajeInicio()
     
     print("""\n\t   ============== [ Ingreso como usuario [u] ] ================
@@ -182,40 +190,66 @@ def ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contr
     respuestaIngreso = input("Tipo de ingreso (Otras opciones: 'b' para buzón o 's' para salir): ")
     
     if respuestaIngreso.lower() == "u":
-        ingresarUsuario(listadoUsuarios)
+        ingresarUsuario(clientes)
         return True
                     
     if respuestaIngreso.lower() == "a":    
-        ingresarAdministrador(listadoAdmins, buzonEmail)
+        ingresarAdministrador(administradores, buzonEmail,clientes)
         return True
             
     if respuestaIngreso.lower() == "b":
-        verificacionPorEmail.abrirEmail(buzonEmail, emailAdmin, contraAdmin, listadoAdmins)
+        verificacionPorEmail.abrirEmail(buzonEmail, administradores["user"]["email"][0],  administradores["user"]["contraseña"], clientes)
+        actualizarDatosAdmins(administradores)
         return True
         
     if respuestaIngreso.lower() == "s":    
-        return False 
-
+        return False
+    
+    else:
+        print("Error al ingresar la opcion, intente denuevo")
+        transicionInicio()
+    
     return True
 
-def asignarAdmins(listadoAdmins):
-    nombreAdminPrincipal = "user"
-    contraAdminPrincipal = "123AA--"
-    emailAdminPrincipal = "user@gmail.com"
+def crearBaseDatos():
     
-    listadoAdmins[0][0] = nombreAdminPrincipal
-    listadoAdmins[0][1] = contraAdminPrincipal
-    listadoAdmins[0][2] = emailAdminPrincipal
+    clientes = {}
+    administradores = {
+        "user":{"contraseña":"123AA--","email":("user@gmail.com",)}}
     
-    return emailAdminPrincipal, contraAdminPrincipal
+    if not os.path.exists(ARCHIVO_ADMINS):
+        with open(ARCHIVO_ADMINS,"w",encoding="utf-8") as f:
+            json.dump(administradores,f,indent=4)
+
+        with open(ARCHIVO_CLIENTES,"w",encoding="utf-8") as f:
+                json.dump(clientes,f,indent=4)
+
+def leerDatosAdmins():
+    with open(ARCHIVO_ADMINS,"r",encoding="utf-8") as f:
+            administradores = json.load(f)
+    return administradores
+
+def leerDatosCLientes():
+    with open(ARCHIVO_CLIENTES,"r",encoding="utf-8") as f:
+                clientes = json.load(f)
+    return clientes
+
+def actualizarDatosAdmins(admins):
+    with open(ARCHIVO_ADMINS,"w",encoding="utf-8") as f:
+        json.dump(admins,f,indent=4)
+
+def actualizarDatosClientes(clientes):
+    with open(ARCHIVO_CLIENTES,"w",encoding="utf-8") as f:
+        json.dump(clientes,f,indent=4)
 
 def main():
     bandera = True
-    listadoUsuarios = [[" " for _ in range(2)] for _ in range(3)]
-    listadoAdmins = [[" " for _ in range(3)] for _ in range(1)]
+    crearBaseDatos()
+    administradores = leerDatosAdmins()
+    clientes = leerDatosCLientes()
     
     buzonEmail = verificacionPorEmail.crearBuzon()
-    emailAdmin, contraAdmin = asignarAdmins(listadoAdmins)
-
+    
     while bandera:
-        bandera = ingresoGeneral(listadoUsuarios, listadoAdmins, buzonEmail, emailAdmin, contraAdmin)
+        bandera = ingresoGeneral(clientes, administradores, buzonEmail)
+        
