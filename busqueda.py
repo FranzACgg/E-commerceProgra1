@@ -1,12 +1,46 @@
+import json
+import os
 import re
 
-catalogo_productos = {
-    101: {"nombre": "Arroz Blanco 1kg", "categoria": "Almacén", "precio": 1200, "stock": 15},
-    102: {"nombre": "Fideos Tallarines 500g", "categoria": "Almacén", "precio": 950, "stock": 20},
-    103: {"nombre": "Aceite de Girasol 1.5L", "categoria": "Almacén", "precio": 2300, "stock": 8},
-    104: {"nombre": "Leche Entera 1L", "categoria": "Lácteos", "precio": 1100, "stock": 12},
-    105: {"nombre": "Galletitas Dulces", "categoria": "Snacks", "precio": 800, "stock": 25}
-}
+# Nombre del archivo JSON donde se guardará el catálogo
+ARCHIVO_CATALOGO = "catalogo.json"
+
+def inicializar_catalogo():
+    """
+    Carga el catálogo desde un archivo JSON. 
+    Si el archivo no existe, lo crea automáticamente con los datos por defecto.
+    """
+    catalogo_inicial = {
+        101: {"nombre": "Arroz Blanco 1kg", "categoria": "Almacén", "precio": 1200, "stock": 15},
+        102: {"nombre": "Fideos Tallarines 500g", "categoria": "Almacén", "precio": 950, "stock": 20},
+        103: {"nombre": "Aceite de Girasol 1.5L", "categoria": "Almacén", "precio": 2300, "stock": 8},
+        104: {"nombre": "Leche Entera 1L", "categoria": "Lácteos", "precio": 1100, "stock": 12},
+        105: {"nombre": "Galletitas Dulces", "categoria": "Snacks", "precio": 800, "stock": 25}
+    }
+    
+    # 1. Verificar si el archivo JSON existe; si no, crearlo con 'wt' y json.dump
+    if not os.path.exists(ARCHIVO_CATALOGO):
+        try:
+            with open(ARCHIVO_CATALOGO, "wt", encoding="utf-8") as archivo:
+                json.dump(catalogo_inicial, archivo, indent=4, ensure_ascii=False)
+            print(f"-> Se creó el archivo '{ARCHIVO_CATALOGO}' exitosamente.")
+        except IOError:
+            print("Error crítico al intentar escribir el archivo de control.")
+            return catalogo_inicial
+
+    # 2. Abrir y leer el archivo JSON con 'rt' y json.load
+    try:
+        with open(ARCHIVO_CATALOGO, "rt", encoding="utf-8") as archivo:
+            datos_cargados = json.load(archivo)
+            # Como JSON guarda las claves como string, las convertimos a int para mantener la consistencia
+            catalogo = {int(id_prod): info for id_prod, info in datos_cargados.items()}
+            return catalogo
+    except (json.JSONDecodeError, IOError):
+        print("Error: El archivo JSON está corrupto o no se pudo leer. Usando valores por defecto.")
+        return catalogo_inicial
+
+# Cargamos el catálogo desde el archivo JSON al iniciar la ejecución
+catalogo_productos = inicializar_catalogo()
 
 def buscar_productos_regex(catalogo):
     """
@@ -18,6 +52,7 @@ def buscar_productos_regex(catalogo):
     for id_prod, datos in catalogo.items():
         try:
             if re.search(patron_busqueda, datos["nombre"], re.IGNORECASE):
+                # Tupla inmutable de consulta
                 encontrados.append((id_prod, datos["nombre"], datos["precio"], datos["stock"]))
         except re.error:
             print("Error: El patrón de expresión regular ingresado no es válido.")
@@ -44,7 +79,6 @@ def mostrar_carrito(carrito):
         print("--------------------------")
         return 0
     
-    # CONJUNTO (set): Identificadores únicos presentes en la compra
     ids_en_carrito = set(carrito.keys())
     print(f"Artículos únicos diferentes en el carrito: {len(ids_en_carrito)}")
     
@@ -186,7 +220,7 @@ def menu_cliente(nombre_usuario, catalogo):
     Menú de navegación que valida las opciones disponibles contra un CONJUNTO (set).
     """
     carrito = {}
-    # CONJUNTO (set) para validación de opciones
+    # CONJUNTO (set) para validación estricta de opciones
     OPCIONES_VALIDAS = {"v", "b", "a", "c", "m", "f", "s"}
 
     while True:
