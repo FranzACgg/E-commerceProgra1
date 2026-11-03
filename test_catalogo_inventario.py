@@ -1,6 +1,5 @@
-"""Pruebas unitarias básicas del módulo de catálogo."""
+"""Pruebas unitarias del catálogo basado en diccionarios."""
 
-import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,26 +9,26 @@ import catalogoInventario as modulo
 
 class TestCatalogoInventario(unittest.TestCase):
     def setUp(self):
-        self.productos = [
-            [1, "Leche", "Lácteos", 100.0, 2, "Leche entera"],
-            [2, "Arroz", "Almacén", 200.0, 10, "Arroz blanco"],
-        ]
+        self.productos = {
+            1: {"nombre": "Leche", "categoria": "Lácteos", "precio": 100.0, "stock": 2, "descripcion": "Leche entera"},
+            2: {"nombre": "Arroz", "categoria": "Almacén", "precio": 200.0, "stock": 10, "descripcion": "Arroz blanco"},
+        }
         modulo.precios_originales.clear()
         modulo.precios_originales.update({1: 100.0, 2: 200.0})
 
     def test_stock_critico_filtra_productos(self):
         resultado = modulo.obtener_productos_stock_critico(self.productos, 2)
-        self.assertEqual([producto[0] for producto in resultado], [1])
+        self.assertEqual(list(resultado.keys()), [1])
 
     def test_descuento_por_categoria(self):
         resultado = modulo.aplicar_descuento_por_categoria(self.productos, "lácteos", 10)
-        self.assertEqual(resultado[0][3], 90.0)
-        self.assertEqual(resultado[1][3], 200.0)
+        self.assertEqual(resultado[1]["precio"], 90.0)
+        self.assertEqual(resultado[2]["precio"], 200.0)
 
     def test_descuento_repetido_no_se_acumula(self):
         primero = modulo.aplicar_descuento_por_categoria(self.productos, "Lácteos", 10)
         segundo = modulo.aplicar_descuento_por_categoria(primero, "Lácteos", 10)
-        self.assertEqual(segundo[0][3], 90.0)
+        self.assertEqual(segundo[1]["precio"], 90.0)
 
     def test_rechaza_descuento_mayor_a_cien(self):
         with self.assertRaises(ValueError):
@@ -55,6 +54,10 @@ class TestCatalogoInventario(unittest.TestCase):
         )
         self.assertEqual(nuevo_id, 3)
         self.assertEqual(len(self.productos), 3)
+        self.assertEqual(self.productos[3]["categoria"], "Importados")
+
+    def test_obtener_categorias_sin_repetir(self):
+        self.assertEqual(modulo.obtener_categorias(self.productos), ["Almacén", "Lácteos"])
 
 
 if __name__ == "__main__":
