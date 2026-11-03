@@ -114,7 +114,7 @@ def validarIngresoCliente(clientes):
             if clientes[nombre] == contra:
                 print("Bienvenido de vuelta usuario")
                 bandera = False
-                opcionesUsuarioCliente.menu_cliente(nombre,catalogo_productos)
+                opcionesUsuarioCliente.menu_cliente(nombre,CATALOGO)
         
         if intentos == 3:
             print("\nError: demasiados intentos fallidos.")
