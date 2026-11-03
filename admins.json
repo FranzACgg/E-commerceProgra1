@@ -1,0 +1,12 @@
+{
+    "user": {
+        "contrase\u00f1a": "123AA--",
+        "email": [
+            "user@gmail.com"
+        ]
+    },
+    "franz": {
+        "contrase\u00f1a": "AS33--",
+        "email": "admin@gmail.com"
+    }
+}

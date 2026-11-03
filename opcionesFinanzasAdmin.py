@@ -61,10 +61,13 @@ def exportar_ticket_txt(venta):
     except IOError as e:
         print(f"Error al emitir ticket físico: {e}")
         return False
-
 def generar_cierre_caja_txt(fecha, total_dia, cantidad_ventas):
     """Guarda el balance contable del día en texto plano."""
-    nombre_archivo = f"cierre_caja_{fecha}.txt"
+    
+    # Reemplazamos caracteres no válidos para nombres de archivos (como '/' o ':') por guiones '-'
+    fecha_limpia = str(fecha).replace("/", "-").replace(":", "-")
+    nombre_archivo = f"cierre_caja_{fecha_limpia}.txt"
+    
     try:
         with open(nombre_archivo, "w", encoding="utf-8") as archivo:
             archivo.write(f"FECHA:{fecha}\n")
