@@ -1,9 +1,9 @@
 import re
 import opcionesFinanzasAdmin
+import opcionesUsuarioAdmin
 from datetime import datetime
 
-
-HISTORIAL_VENTAS = "ventas.json"
+RUTA_HISTORIAL_VENTAS = "ventas.json"
 
 def buscar_productos_regex(catalogo):
     """
@@ -122,12 +122,9 @@ def modificar_o_eliminar_carrito(carrito):
 
     if opc == "1":
         try:
-            nueva_cant = int(input("Ingrese la nueva cantidad (0 para eliminar): "))
-            if nueva_cant < 0:
+            nueva_cant = int(input("Ingrese la nueva cantidad: "))
+            if nueva_cant <= 0:
                 print("Cantidad inválida.")
-            elif nueva_cant == 0:
-                carrito.pop(id_prod, None)
-                print("Producto eliminado del carrito.")
             else:
                 carrito[id_prod]["cantidad"] = nueva_cant
                 print("Cantidad actualizada.")
@@ -162,13 +159,13 @@ def resumen_compra(carrito,cliente):
         fecha_actual = datetime.now().strftime("%d/%m/%Y")
 
   
-        historial = opcionesFinanzasAdmin.cargar_historial_json(HISTORIAL_VENTAS)
+        historial = opcionesFinanzasAdmin.cargar_historial_json(RUTA_HISTORIAL_VENTAS)
 
    
         historial = opcionesFinanzasAdmin.registrarVenta(cliente, id_venta, fecha_actual, carrito, historial)
 
    
-        opcionesFinanzasAdmin.guardar_historial_json(HISTORIAL_VENTAS, historial)
+        opcionesFinanzasAdmin.guardar_historial_json(RUTA_HISTORIAL_VENTAS, historial)
 
         venta_registrada = opcionesFinanzasAdmin.consultarVentaPorID(historial, id_venta)
         if venta_registrada:
@@ -193,15 +190,18 @@ def ver_categorias_disponibles(catalogo):
     
     print("\nCategorías disponibles (Conjunto único):", ", ".join(categorias))
 
+def leerCatalogo():
+    return opcionesUsuarioAdmin.cargar_catalogo_json()
 
-def menu_cliente(nombre_usuario, catalogo):
+def menu_cliente(nombre_usuario):
     """
     Menú de navegación que valida las opciones disponibles contra un CONJUNTO (set).
     """
     carrito = {}
     # CONJUNTO (set) para validación de opciones
     OPCIONES_VALIDAS = {"v", "b", "a", "c", "m", "f", "s"}
-
+    catalogo = leerCatalogo()
+    
     while True:
         print(f"\n===== PANEL CLIENTE: {nombre_usuario.upper()} =====")
         print("[V] Ver catálogo completo")

@@ -8,7 +8,6 @@ import opcionesFinanzasAdmin
 
 ARCHIVO_ADMINS = "admins.json"
 ARCHIVO_CLIENTES = "clientes.json"
-CATALOGO = " catalogo_productos.json"
 
 
 def validarContrasenia(contra):
@@ -114,7 +113,8 @@ def validarIngresoCliente(clientes):
             if clientes[nombre] == contra:
                 print("Bienvenido de vuelta usuario")
                 bandera = False
-                opcionesUsuarioCliente.menu_cliente(nombre,CATALOGO)
+                opcionesUsuarioCliente.menu_cliente(nombre)
+                return
         
         if intentos == 3:
             print("\nError: demasiados intentos fallidos.")
@@ -157,6 +157,7 @@ def ingresarAdministrador(administradores, buzonEmail,clientes):
 def validarIngresoAdmin(administradores):
     intentos = 0
     bandera = True
+    invalido = False
         
     while bandera:
             
@@ -171,21 +172,17 @@ def validarIngresoAdmin(administradores):
                     print("="*10)
                     
                     invalido = True
-                    try:
-                        while invalido:
-                            respuesta = input("").strip()
-                            if respuesta.lower() == "p":
-                                opcionesUsuarioAdmin.menu_administrador() 
-                                invalido =False
-                            elif respuesta.lower() == "f":
-                                opcionesFinanzasAdmin.menu_principal()
-                                invalido = False
-                            else:
-                                print("Respuesta Invalida, ingrese denuevo su respuesta \n")
-                    except ValueError:
-                        print("Ingreso invalido, intente denuevo")
-                        continue
-                        
+            while invalido:
+                respuesta = input("").strip().lower()
+
+                if respuesta == "p":
+                    invalido = False
+                    opcionesUsuarioAdmin.menu_administrador() 
+                elif respuesta == "f":
+                    invalido = False
+                    opcionesFinanzasAdmin.menu_principal()
+                else:
+                    print("Respuesta Invalida, ingrese denuevo su respuesta \n")
             if intentos == 3:
                 print("\nError: demasiados intentos fallidos.")
                 transicionInicio()
@@ -219,7 +216,7 @@ def ingresoGeneral(clientes, administradores, buzonEmail):
         return True
             
     if respuestaIngreso.lower() == "b":
-        verificacionPorEmail.abrirEmail(buzonEmail, administradores["user"]["email"][0],  administradores["user"]["contraseña"], clientes)
+        verificacionPorEmail.abrirEmail(buzonEmail, administradores["user"]["email"][0],  administradores["user"]["contraseña"], administradores)
         actualizarDatosAdmins(administradores)
         return True
         
@@ -232,18 +229,7 @@ def ingresoGeneral(clientes, administradores, buzonEmail):
     
     return True
 
-def crearBaseDatos():
-    
-    clientes = {}
-    administradores = {
-        "user":{"contraseña":"123AA--","email":("user@gmail.com",)}}
-    
-    if not os.path.exists(ARCHIVO_ADMINS):
-        with open(ARCHIVO_ADMINS,"w",encoding="utf-8") as f:
-            json.dump(administradores,f,indent=4)
 
-        with open(ARCHIVO_CLIENTES,"w",encoding="utf-8") as f:
-                json.dump(clientes,f,indent=4)
 
 def leerDatosAdmins():
     with open(ARCHIVO_ADMINS,"r",encoding="utf-8") as f:
@@ -265,7 +251,6 @@ def actualizarDatosClientes(clientes):
 
 def main():
     bandera = True
-    crearBaseDatos()
     administradores = leerDatosAdmins()
     clientes = leerDatosCLientes()
     
