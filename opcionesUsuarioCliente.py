@@ -1,12 +1,9 @@
 import re
+import opcionesFinanzasAdmin
+from datetime import datetime
 
-catalogo_productos = {
-    101: {"nombre": "Arroz Blanco 1kg", "categoria": "Almacén", "precio": 1200, "stock": 15},
-    102: {"nombre": "Fideos Tallarines 500g", "categoria": "Almacén", "precio": 950, "stock": 20},
-    103: {"nombre": "Aceite de Girasol 1.5L", "categoria": "Almacén", "precio": 2300, "stock": 8},
-    104: {"nombre": "Leche Entera 1L", "categoria": "Lácteos", "precio": 1100, "stock": 12},
-    105: {"nombre": "Galletitas Dulces", "categoria": "Snacks", "precio": 800, "stock": 25}
-}
+
+HISTORIAL_VENTAS = "ventas.json"
 
 def buscar_productos_regex(catalogo):
     """
@@ -143,7 +140,7 @@ def modificar_o_eliminar_carrito(carrito):
         print("Opción no válida.")
 
 
-def resumen_compra(carrito):
+def resumen_compra(carrito,cliente):
     """
     Pantalla previa de checkout y generación de comprobante final como TUPLA inmutable.
     """
@@ -160,9 +157,25 @@ def resumen_compra(carrito):
     
     confirmar = input("¿Desea confirmar y simular el pago? (S/N): ").strip().lower()
     if confirmar == "s":
-        # TUPLA: Comprobante inmutable emitido (total, cantidad_items)
-        comprobante = (total, len(carrito))
-        print(f"\n¡Pago realizado con éxito! Total abonado: ${comprobante[0]}")
+        # Generación automática de ID y Fecha
+        id_venta = f"T-{int(datetime.now().timestamp())}"
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
+
+  
+        historial = opcionesFinanzasAdmin.cargar_historial_json(HISTORIAL_VENTAS)
+
+   
+        historial = opcionesFinanzasAdmin.registrarVenta(cliente, id_venta, fecha_actual, carrito, historial)
+
+   
+        opcionesFinanzasAdmin.guardar_historial_json(HISTORIAL_VENTAS, historial)
+
+        venta_registrada = opcionesFinanzasAdmin.consultarVentaPorID(historial, id_venta)
+        if venta_registrada:
+            opcionesFinanzasAdmin.exportar_ticket_txt(venta_registrada)
+
+        print(f"\n¡Pago realizado con éxito! Ticket N°: {id_venta}")
+        print(f"Total abonado: ${total}")
         carrito.clear()
         return True
     else:
@@ -219,7 +232,7 @@ def menu_cliente(nombre_usuario, catalogo):
         elif opcion == "m":
             modificar_o_eliminar_carrito(carrito)
         elif opcion == "f":
-            resumen_compra(carrito)
+            resumen_compra(carrito,nombre_usuario)
         elif opcion == "s":
             print("Cerrando sesión de cliente...")
             break

@@ -4,9 +4,12 @@ import json
 import os
 import opcionesUsuarioCliente
 import opcionesUsuarioAdmin
+import opcionesFinanzasAdmin
 
 ARCHIVO_ADMINS = "admins.json"
 ARCHIVO_CLIENTES = "clientes.json"
+CATALOGO = " catalogo_productos.json"
+
 
 def validarContrasenia(contra):
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
@@ -111,7 +114,7 @@ def validarIngresoCliente(clientes):
             if clientes[nombre] == contra:
                 print("Bienvenido de vuelta usuario")
                 bandera = False
-                opcionesUsuarioCliente.menu_cliente(nombre)
+                opcionesUsuarioCliente.menu_cliente(nombre,catalogo_productos)
         
         if intentos == 3:
             print("\nError: demasiados intentos fallidos.")
@@ -163,8 +166,26 @@ def validarIngresoAdmin(administradores):
                 if administradores[nombre]["contraseña"] == contra:
                     print("Bienvenido de vuelta administrador")
                     bandera = False
-                    opcionesUsuarioAdmin.menu_cliente(nombre) 
-                
+                    print("="*10)
+                    print("Desea ingresar al apartado de productos (p) o finanzas (f)")
+                    print("="*10)
+                    
+                    invalido = True
+                    try:
+                        while invalido:
+                            respuesta = input("").strip()
+                            if respuesta.lower() == "p":
+                                opcionesUsuarioAdmin.menu_administrador() 
+                                invalido =False
+                            elif respuesta.lower() == "f":
+                                opcionesFinanzasAdmin.menu_principal()
+                                invalido = False
+                            else:
+                                print("Respuesta Invalida, ingrese denuevo su respuesta \n")
+                    except ValueError:
+                        print("Ingreso invalido, intente denuevo")
+                        continue
+                        
             if intentos == 3:
                 print("\nError: demasiados intentos fallidos.")
                 transicionInicio()
