@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from functools import reduce
 
 RUTA_CATALOGO = "catalogo.json"

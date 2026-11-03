@@ -1,7 +1,6 @@
 import re
 import verificacionPorEmail
 import json
-import os
 import opcionesUsuarioCliente
 import opcionesUsuarioAdmin
 import opcionesFinanzasAdmin
