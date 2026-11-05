@@ -8,6 +8,20 @@ precios_originales = {}
 
 
 def validar_numero(valor, nombre_campo, minimo = None):
+    """
+        Valida si el valor ingresado es un numero.
+        
+        >>> validar_numero(28.5,"Porcentaje de descuento",0)
+        28.5
+        >>> validar_numero("veiniocho","Porcentaje de descuento",0)
+        Traceback (most recent call last):
+        ...
+        ValueError: Porcentaje de descuento debe ser un número válido.
+        >>> validar_numero(-28,"Porcentaje de descuento",0)
+        Traceback (most recent call last):
+        ...
+        ValueError: Porcentaje de descuento no puede ser menor que 0.
+    """
     try:
         numero = float(valor)
     except (TypeError, ValueError) as error:
@@ -18,6 +32,20 @@ def validar_numero(valor, nombre_campo, minimo = None):
 
 
 def validar_entero(valor, nombre_campo, minimo = None ):
+    """
+        Valida si el valor ingresado es un entero.
+        
+        >>> validar_entero(3,"Stock del Producto",0)
+        3
+        >>> validar_entero("f","Stock del Producto",0)
+        Traceback (most recent call last):
+        ...
+        ValueError: Stock del Producto debe ser un número entero.
+        >>> validar_entero(-20,"Stock del Producto",0)  
+        Traceback (most recent call last):
+        ...
+        ValueError: Stock del Producto no puede ser menor que 0.
+    """
     try:
         numero = int(valor)
     except (TypeError, ValueError) as error:
@@ -68,11 +96,38 @@ def listar_catalogo(productos):
 
 
 def obtener_categorias(productos):
+    """
+    Devuelve las categorías existentes sin repetirlas.
+    
+    >>> catalogo = {
+    ...     1: {"nombre": "Leche Entera 1L", "categoria": "Lácteos", "precio": 1200.0, "stock": 15, "descripcion": "Leche fluida pasteurizada"},
+    ...     2: {"nombre": "Arroz Largo Fino 1kg", "categoria": "Almacén", "precio": 1800.0, "stock": 4, "descripcion": "Arroz blanco seleccionado"},
+    ...     3: {"nombre": "Aceite Girasol 1.5L", "categoria": "Almacén", "precio": 2500.0, "stock": 3, "descripcion": "Aceite puro comestible"},
+    ...     4: {"nombre": "Queso Cremoso 1kg", "categoria": "Lácteos", "precio": 6500.0, "stock": 8, "descripcion": "Queso de pasta blanda"},
+    ...     5: {"nombre": "Fideos Tallarines 500g", "categoria": "Almacén", "precio": 1100.0, "stock": 2, "descripcion": "Fideos de sémola"},
+    ...     6: {"nombre": "Café Molido 250g", "categoria": "Importados", "precio": 5200.0, "stock": 12, "descripcion": "Café colombiano premium"}
+    ... }
+    >>> obtener_categorias(catalogo)
+    ['Almacén', 'Importados', 'Lácteos']
+    """
+    
     """Devuelve las categorías existentes sin repetirlas."""
     return sorted({producto["categoria"] for producto in productos.values()})
 
 
 def obtener_productos_stock_critico(productos, umbral):
+    """
+    Filtra y devuelve un diccionario con los productos cuyo stock 
+    sea menor o igual al umbral especificado.
+    
+    >>> catalogo = {
+    ...     1: {"nombre": "Leche", "stock": 2},
+    ...     2: {"nombre": "Arroz", "stock": 10},
+    ...     3: {"nombre": "Aceite", "stock": 5}
+    ... }
+    >>> obtener_productos_stock_critico(catalogo, umbral=5)
+    {1: {'nombre': 'Leche', 'stock': 2}, 3: {'nombre': 'Aceite', 'stock': 5}}
+    """
     umbral = validar_entero(umbral, "El umbral", minimo=0)
     return dict(filter(lambda elemento: elemento[1]["stock"] <= umbral, productos.items()))
 

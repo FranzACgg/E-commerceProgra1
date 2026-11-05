@@ -10,6 +10,14 @@ ARCHIVO_CLIENTES = "clientes.json"
 
 
 def validarContrasenia(contra):
+    """
+    Valida si la contraseña cumple con los requisitos.
+    
+    >>> validarContrasenia("AAmin123--")
+    True
+    >>> validarContrasenia("123")
+    False
+    """
     patron = r'^(?=(.*[A-Z]){2,})(?=(.*[\W_]){2,})(?=(.*\d){2,}).+$'
     return bool(re.match(patron, contra))
 
@@ -23,6 +31,14 @@ def transicionInicio():
     input("[Presione Enter para continuar]\n")
 
 def usuarioEnLista(nombre, registro):
+    """
+        Valida si el nombre ingresado esta en lista.
+        
+        >>> usuarioEnLista("Franco",["Franco","Pablo","Luciano"])
+        True
+        >>> usuarioEnLista("Rodrigo",["Franco","Pablo","Luciano"])
+        False
+        """
     return True if nombre in registro else False
 
 def pedirCredencialesNuevas(registro):
@@ -102,6 +118,12 @@ def ingresarUsuario(clientes):
             
             
 def validarIngresoCliente(clientes): 
+    """
+        Valida el cliente ingresado es correcto
+
+        >>>validarIngresoCliente({"Geremias": AAA233--,"Juan": 44SF--})
+        True
+    """
     intentos = 0
     bandera = True
     
