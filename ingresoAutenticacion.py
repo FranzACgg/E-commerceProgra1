@@ -120,9 +120,6 @@ def ingresarUsuario(clientes):
 def validarIngresoCliente(clientes): 
     """
         Valida el cliente ingresado es correcto
-
-        >>>validarIngresoCliente({"Geremias": AAA233--,"Juan": 44SF--})
-        True
     """
     intentos = 0
     bandera = True
